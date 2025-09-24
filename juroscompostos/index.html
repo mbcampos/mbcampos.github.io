@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Calculadora de Juros Compostos</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -96,6 +102,22 @@
       border-radius: 6px;
     }
 
+    .erro {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #e74c3c;
+      padding: 12px;
+      background: #fdf2f2;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .input-group input.erro-campo, .input-group select.erro-campo {
+      border-color: #e74c3c;
+      background-color: #fdf2f2;
+    }
+
     canvas {
       margin-top: 20px;
     }
@@ -108,17 +130,17 @@
 
     <div class="input-group">
       <label>Valor inicial (R$)</label>
-      <input type="number" id="valorInicial" placeholder="Ex: 10000">
+      <input type="text" id="valorInicial" placeholder="R$ 10.000,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
     </div>
 
     <div class="input-group">
       <label>Valor mensal (R$)</label>
-      <input type="number" id="valorMensal" placeholder="Ex: 500">
+      <input type="text" id="valorMensal" placeholder="R$ 500,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
     </div>
 
     <div class="input-group">
       <label>Taxa de juros (% ao ano)</label>
-      <input type="number" id="taxaJuros" step="0.01" placeholder="Ex: 12">
+      <input type="text" id="taxaJuros" placeholder="12,50%" oninput="aplicarMascaraPorcentagem(this)" onblur="aplicarMascaraPorcentagem(this)">
     </div>
 
     <div class="input-group">
@@ -134,6 +156,8 @@
 
     <button class="btn" onclick="calcular()">Calcular</button>
 
+    <div class="erro" id="erro"></div>
+
     <div class="resultado" id="resultado"></div>
 
     <canvas id="grafico"></canvas>
@@ -142,10 +166,157 @@
   <script>
     let chart;
 
+    // Função para aplicar máscara de moeda
+    function aplicarMascaraMoeda(input) {
+      let valor = input.value;
+      
+      // Remove tudo que não é número
+      valor = valor.replace(/\D/g, '');
+      
+      if (valor === '') {
+        input.value = '';
+        return;
+      }
+      
+      // Converte para centavos
+      valor = parseFloat(valor) / 100;
+      
+      // Formata como moeda brasileira
+      input.value = 'R$ ' + valor.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Função para aplicar máscara de porcentagem
+    function aplicarMascaraPorcentagem(input) {
+      let valor = input.value;
+      
+      // Remove tudo que não é número ou vírgula/ponto
+      valor = valor.replace(/[^\d,\.]/g, '');
+      
+      // Substitui ponto por vírgula para padrão brasileiro
+      valor = valor.replace(/\./g, ',');
+      
+      // Garante apenas uma vírgula
+      let partes = valor.split(',');
+      if (partes.length > 2) {
+        valor = partes[0] + ',' + partes.slice(1).join('');
+      }
+      
+      // Limita casas decimais a 2
+      if (partes[1] && partes[1].length > 2) {
+        valor = partes[0] + ',' + partes[1].substring(0, 2);
+      }
+      
+      if (valor !== '') {
+        input.value = valor + '%';
+      } else {
+        input.value = '';
+      }
+    }
+
+    // Função para extrair valor numérico dos campos com máscara
+    function extrairValorNumerico(valor, tipo) {
+      if (!valor) return 0;
+      
+      if (tipo === 'moeda') {
+        // Remove R$, pontos e substitui vírgula por ponto
+        return parseFloat(valor.replace(/R\$\s?/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+      } else if (tipo === 'porcentagem') {
+        // Remove % e substitui vírgula por ponto
+        return parseFloat(valor.replace(/%/g, '').replace(/,/g, '.')) || 0;
+      }
+      
+      return parseFloat(valor) || 0;
+    }
+
+    function limparErros() {
+      // Remove classes de erro dos campos
+      document.querySelectorAll('.erro-campo').forEach(campo => {
+        campo.classList.remove('erro-campo');
+      });
+      
+      // Esconde mensagem de erro
+      document.getElementById('erro').style.display = 'none';
+    }
+
+    function validarCampos() {
+      const campos = [
+        { id: 'valorInicial', nome: 'Valor inicial', obrigatorio: false },
+        { id: 'valorMensal', nome: 'Valor mensal', obrigatorio: false },
+        { id: 'taxaJuros', nome: 'Taxa de juros', obrigatorio: true },
+        { id: 'periodo', nome: 'Período', obrigatorio: true }
+      ];
+
+      let camposComErro = [];
+      let valorInicialPreenchido = false;
+      let valorMensalPreenchido = false;
+
+      campos.forEach(campo => {
+        const elemento = document.getElementById(campo.id);
+        const valor = elemento.value.trim();
+        let valorNumerico = 0;
+        
+        // Extrai valor numérico baseado no tipo do campo
+        if (campo.id === 'valorInicial' || campo.id === 'valorMensal') {
+          valorNumerico = extrairValorNumerico(valor, 'moeda');
+        } else if (campo.id === 'taxaJuros') {
+          valorNumerico = extrairValorNumerico(valor, 'porcentagem');
+        } else {
+          valorNumerico = parseFloat(valor);
+        }
+        
+        // Verifica se é obrigatório e está vazio
+        if (campo.obrigatorio && (!valor || valorNumerico <= 0)) {
+          elemento.classList.add('erro-campo');
+          camposComErro.push(campo.nome);
+        }
+        
+        // Verifica se valor inicial ou mensal foram preenchidos
+        if (campo.id === 'valorInicial' && valor && valorNumerico > 0) {
+          valorInicialPreenchido = true;
+        }
+        if (campo.id === 'valorMensal' && valor && valorNumerico > 0) {
+          valorMensalPreenchido = true;
+        }
+      });
+
+      // Pelo menos um dos valores (inicial ou mensal) deve ser preenchido
+      if (!valorInicialPreenchido && !valorMensalPreenchido) {
+        document.getElementById('valorInicial').classList.add('erro-campo');
+        document.getElementById('valorMensal').classList.add('erro-campo');
+        camposComErro.push('Valor inicial ou Valor mensal (pelo menos um deve ser preenchido)');
+      }
+
+      return camposComErro;
+    }
+
+    function exibirErro(erros) {
+      const divErro = document.getElementById('erro');
+      let mensagem = 'Por favor, corrija os seguintes campos:\n';
+      erros.forEach(erro => {
+        mensagem += '• ' + erro + '\n';
+      });
+      
+      divErro.textContent = mensagem;
+      divErro.style.display = 'block';
+    }
+
     function calcular() {
-      let valorInicial = parseFloat(document.getElementById('valorInicial').value) || 0;
-      let valorMensal = parseFloat(document.getElementById('valorMensal').value) || 0;
-      let taxaJuros = parseFloat(document.getElementById('taxaJuros').value) / 100 || 0;
+      // Limpa erros anteriores
+      limparErros();
+      
+      // Valida campos
+      const erros = validarCampos();
+      if (erros.length > 0) {
+        exibirErro(erros);
+        return;
+      }
+
+      let valorInicial = extrairValorNumerico(document.getElementById('valorInicial').value, 'moeda');
+      let valorMensal = extrairValorNumerico(document.getElementById('valorMensal').value, 'moeda');
+      let taxaJuros = extrairValorNumerico(document.getElementById('taxaJuros').value, 'porcentagem') / 100;
       let periodo = parseInt(document.getElementById('periodo').value) || 0;
       let periodoTipo = document.getElementById('periodoTipo').value;
 
