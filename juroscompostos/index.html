@@ -111,6 +111,7 @@
       background: #ecf0f1;
       border-radius: 6px;
       word-break: break-word;
+      display: none; /* Inicialmente oculto */
     }
 
     .erro {
@@ -134,6 +135,7 @@
       margin-top: 20px;
       max-width: 100%;
       height: auto;
+      display: none; /* Inicialmente oculto */
     }
 
     /* RESPONSIVIDADE PARA SMARTPHONES */
@@ -399,6 +401,20 @@
       document.getElementById('erro').style.display = 'none';
     }
 
+    function limparResultado() {
+      // Esconde o resultado
+      document.getElementById('resultado').style.display = 'none';
+      
+      // Esconde o canvas
+      document.getElementById('grafico').style.display = 'none';
+      
+      // Destroi o gráfico se existir
+      if (chart) {
+        chart.destroy();
+        chart = null;
+      }
+    }
+
     function validarCampos() {
       const campos = [
         { id: 'valorInicial', nome: 'Valor inicial', obrigatorio: false },
@@ -469,6 +485,7 @@
       const erros = validarCampos();
       if (erros.length > 0) {
         exibirErro(erros);
+        limparResultado(); // Esconde resultado quando há erro
         return;
       }
 
@@ -493,8 +510,10 @@
         historico.push(saldo);
       }
 
-      document.getElementById('resultado').innerText =
+      const elementoResultado = document.getElementById('resultado');
+      elementoResultado.innerText =
         "Valor final: R$ " + saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      elementoResultado.style.display = 'block'; // Mostra o resultado
 
       // Criar labels dos meses
       let labels = [];
@@ -508,6 +527,10 @@
       }
 
       let ctx = document.getElementById('grafico').getContext('2d');
+      
+      // Mostra o canvas antes de criar o gráfico
+      document.getElementById('grafico').style.display = 'block';
+      
       chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -536,6 +559,19 @@
         }
       });
     }
+    
+    // Adicionar event listeners para limpar resultado quando campos são editados
+    document.addEventListener('DOMContentLoaded', function() {
+      const campos = ['valorInicial', 'valorMensal', 'taxaJuros', 'periodo', 'periodoTipo'];
+      
+      campos.forEach(campoId => {
+        const campo = document.getElementById(campoId);
+        campo.addEventListener('input', function() {
+          limparResultado();
+          limparErros();
+        });
+      });
+    });
   </script>
 </body>
 </html>
