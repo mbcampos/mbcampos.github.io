@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folha de Ponto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f5f7;
+            color: #1f2933;
+            padding: 24px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .controls label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #45505d;
+        }
+
+        .controls input[type="text"],
+        .controls input[type="month"] {
+            margin-top: 6px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd2d9;
+            font-size: 1rem;
+            background-color: #ffffff;
+            color: #1f2933;
+        }
+
+        .controls button {
+            justify-self: flex-start;
+            align-self: center;
+            padding: 12px 20px;
+            border-radius: 6px;
+            border: none;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .controls button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .sheet-container {
+            display: flex;
+            justify-content: center;
+            padding-bottom: 36px;
+        }
+
+        .sheet {
+            width: 210mm;
+            min-height: 297mm;
+            background-color: #ffffff;
+            border: 1px solid #b8c1cc;
+            border-radius: 6px;
+            padding: 32px 28px 60px;
+            position: relative;
+        }
+
+        .sheet-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .sheet-header h2 {
+            margin: 4px 0;
+            font-weight: 400;
+            font-size: 1.05rem;
+        }
+
+        .sheet-header h3 {
+            margin: 6px 0;
+            font-weight: 300;
+            font-size: 0.95rem;
+        }
+
+        .sheet-header .clock-icon {
+            font-size: 2.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #b8c1cc;
+            text-align: center;
+            padding: 10px 6px;
+            height: 32px;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        td:first-child {
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #fafbfc;
+        }
+
+        .signature-area {
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            margin-top: 60px;
+        }
+
+        .signature-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .signature-line {
+            width: 70%;
+            border-bottom: 1px solid #000000;
+            height: 32px;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background-color: #ffffff;
+            }
+
+            .page-wrapper {
+                gap: 0;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .sheet-container {
+                padding: 0;
+            }
+
+            .sheet {
+                border: none;
+                border-radius: 0;
+                padding: 32px 28px 40px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div>
+            <h1>Gerador de Folha de Ponto</h1>
+            <p style="margin: 0; font-size: 0.95rem; color: #616e7c;">Selecione o mês e personalize os dados antes de exportar em PDF.</p>
+        </div>
+        <form class="controls" id="timesheetForm">
+            <label>
+                Mês/Ano
+                <input type="month" id="monthPicker" required>
+            </label>
+            <label>
+                Nome do empregador
+                <input type="text" id="employerInput" placeholder="Nome do empregador" required>
+            </label>
+            <label>
+                Nome do empregado
+                <input type="text" id="employeeInput" placeholder="Nome do empregado" required>
+            </label>
+            <button type="button" id="downloadPdfBtn">Gerar PDF</button>
+        </form>
+        <div class="sheet-container">
+            <div class="sheet" id="sheet">
+                <div class="sheet-header">
+                    <div class="clock-icon">⏳</div>
+                    <h2 id="monthTitle">Mês/Ano: --/----</h2>
+                    <h3 id="employerName">Nome do empregador: —</h3>
+                    <h3 id="employeeName">Nome do empregado: —</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Almoço<br>(Saída)</th>
+                            <th>Almoço<br>(Retorno)</th>
+                            <th>Saída</th>
+                            <th>Assinatura</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timesheetBody"></tbody>
+                </table>
+                <div class="signature-area">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <span>Assinatura do empregador</span>
+                    </div>
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <span>Assinatura do empregado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5H0h9qqwltJxK5H8cz5Omc2qQeiI02gXRMBtpi64xpF5vVl5QIGffWswZb5ZjF2yp7mkIyN0pTrG0B3l0Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-VfPZOBiDLx2nUQy3SsguLyyS4fA3TeJbfjmBsH79PSz5i2Pk2cPMJhT8XkuZUbMjMCOutOrz+7z2RGk/B4h9Mw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-1fxUqIcd0w5wvG0uVwV1QwhXyhjWzuuQjGNK5rVRrTD1Ryyw6Uoy7rBQy97PK2vn3edqDKdohsEDqk1JdL2IRw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const monthPicker = document.getElementById('monthPicker');
+        const employerInput = document.getElementById('employerInput');
+        const employeeInput = document.getElementById('employeeInput');
+        const timesheetBody = document.getElementById('timesheetBody');
+        const monthTitle = document.getElementById('monthTitle');
+        const employerName = document.getElementById('employerName');
+        const employeeName = document.getElementById('employeeName');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const sheetElement = document.getElementById('sheet');
+        const timesheetForm = document.getElementById('timesheetForm');
+
+        // Returns an array of objects containing the working days for the selected month.
+        function buildWorkdays(year, month) {
+            const days = [];
+            const date = new Date(year, month, 1);
+            while (date.getMonth() === month) {
+                const isSunday = date.getDay() === 0;
+                if (!isSunday) {
+                    days.push({
+                        formattedDate: date.toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }),
+                        isoDate: new Date(date)
+                    });
+                }
+                date.setDate(date.getDate() + 1);
+            }
+            return days;
+        }
+
+        function updateSheet() {
+            const monthValue = monthPicker.value;
+            if (!monthValue) {
+                return;
+            }
+            const [yearStr, monthStr] = monthValue.split('-');
+            const year = parseInt(yearStr, 10);
+            const monthIndex = parseInt(monthStr, 10) - 1;
+
+            const workdays = buildWorkdays(year, monthIndex);
+            timesheetBody.innerHTML = '';
+
+            const fragment = document.createDocumentFragment();
+            workdays.forEach((day) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${day.formattedDate}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                `;
+                fragment.appendChild(row);
+            });
+            timesheetBody.appendChild(fragment);
+
+            const monthDisplay = new Date(year, monthIndex).toLocaleDateString('pt-BR', {
+                month: '2-digit',
+                year: 'numeric'
+            });
+            monthTitle.textContent = `Mês/Ano: ${monthDisplay}`;
+            employerName.textContent = `Nome do empregador: ${employerInput.value || '—'}`;
+            employeeName.textContent = `Nome do empregado: ${employeeInput.value || '—'}`;
+        }
+
+        function setupInitialState() {
+            const today = new Date();
+            const monthValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            monthPicker.value = monthValue;
+            employerInput.value = 'Matheus Barreto Campos';
+            employeeInput.value = 'Paloma Marinho Santos';
+            updateSheet();
+        }
+
+        function handleFormChange() {
+            updateSheet();
+        }
+
+        async function downloadPdf() {
+            // html2pdf ensures the final document respects A4 size and keeps the layout intact.
+            const options = {
+                margin: [10, 12, 18, 12],
+                filename: `folha-ponto-${monthPicker.value}.pdf`,
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+            await html2pdf().set(options).from(sheetElement).save();
+        }
+
+        timesheetForm.addEventListener('input', handleFormChange);
+        downloadPdfBtn.addEventListener('click', downloadPdf);
+
+        setupInitialState();
+    </script>
+</body>
+</html>
