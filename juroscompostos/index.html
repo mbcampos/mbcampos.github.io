@@ -409,18 +409,12 @@
       <div class="input-group">
         <label>Calcular:</label>
         <select id="calcularOpcao">
-          <option value="aporte">Aporte mensal necessário (com taxa fixa)</option>
           <option value="taxa">Taxa de juros necessária (com aporte fixo)</option>
           <option value="inicial">Valor inicial necessário (sem aportes)</option>
         </select>
       </div>
 
-      <div class="input-group" id="taxaFixaGroup">
-        <label>Taxa de juros estimada (% ao ano)</label>
-        <input type="text" id="taxaFixa" placeholder="12,50%" oninput="aplicarMascaraPorcentagem(this)" onblur="aplicarMascaraPorcentagem(this)">
-      </div>
-
-      <div class="input-group" id="aporteFixoGroup" style="display: none;">
+      <div class="input-group" id="aporteFixoGroup">
         <label>Aporte mensal fixo (R$)</label>
         <input type="text" id="aporteFixo" placeholder="R$ 500,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
       </div>
@@ -469,23 +463,15 @@
     // Função para alternar campos no modo planejamento
     function atualizarCamposPlanejamento() {
       const opcao = document.getElementById('calcularOpcao').value;
-      const taxaFixaGroup = document.getElementById('taxaFixaGroup');
       const aporteFixoGroup = document.getElementById('aporteFixoGroup');
       const taxaSemAporteGroup = document.getElementById('taxaSemAporteGroup');
       const valorInicialPlanGroup = document.getElementById('valorInicialPlan').parentElement;
       
-      if (opcao === 'aporte') {
-        taxaFixaGroup.style.display = 'block';
-        aporteFixoGroup.style.display = 'none';
-        taxaSemAporteGroup.style.display = 'none';
-        valorInicialPlanGroup.style.display = 'block';
-      } else if (opcao === 'taxa') {
-        taxaFixaGroup.style.display = 'none';
+      if (opcao === 'taxa') {
         aporteFixoGroup.style.display = 'block';
         taxaSemAporteGroup.style.display = 'none';
         valorInicialPlanGroup.style.display = 'block';
       } else if (opcao === 'inicial') {
-        taxaFixaGroup.style.display = 'none';
         aporteFixoGroup.style.display = 'none';
         taxaSemAporteGroup.style.display = 'block';
         valorInicialPlanGroup.style.display = 'none';
@@ -753,13 +739,7 @@
         erros.push('Período');
       }
       
-      if (calcularOpcao === 'aporte') {
-        const taxaFixa = extrairValorNumerico(document.getElementById('taxaFixa').value, 'porcentagem');
-        if (!taxaFixa || taxaFixa <= 0) {
-          document.getElementById('taxaFixa').classList.add('erro-campo');
-          erros.push('Taxa de juros estimada');
-        }
-      } else if (calcularOpcao === 'taxa') {
+      if (calcularOpcao === 'taxa') {
         const aporteFixo = extrairValorNumerico(document.getElementById('aporteFixo').value, 'moeda');
         if (!aporteFixo || aporteFixo <= 0) {
           document.getElementById('aporteFixo').classList.add('erro-campo');
@@ -785,129 +765,32 @@
       let mensagemResultado = '';
       let historico = [];
       
-      if (calcularOpcao === 'aporte') {
-        // Calcular aporte mensal necessário
-        const taxaAnual = extrairValorNumerico(document.getElementById('taxaFixa').value, 'porcentagem') / 100;
-        const taxaMensal = Math.pow(1 + taxaAnual, 1/12) - 1;
-        
-        // Se considerar IR, precisamos ajustar o valor final desejado
-        let valorFinalBruto = valorFinal;
-        if (calcularIRChecked) {
-          const aliquotaIR = calcularAliquotaIR(meses);
-          // Fórmula: VF_liquido = VF_bruto - (VF_bruto - Total_Investido) * aliquota
-          // Resolvendo para VF_bruto quando sabemos VF_liquido
-          // Esta é uma aproximação iterativa
-          valorFinalBruto = valorFinal * 1.2; // Chute inicial
-        }
-        
-        // Fórmula: PMT = (FV - PV * (1 + i)^n) / (((1 + i)^n - 1) / i)
-        const fatorCrescimento = Math.pow(1 + taxaMensal, meses);
-        const valorFinalInicial = valorInicial * fatorCrescimento;
-        const diferenca = valorFinalBruto - valorFinalInicial;
-        
-        let aporteMensal = 0;
-        if (taxaMensal > 0) {
-          aporteMensal = diferenca / ((fatorCrescimento - 1) / taxaMensal);
-        } else {
-          aporteMensal = diferenca / meses;
-        }
-        
-        // Recalcula considerando o IR se necessário
-        if (calcularIRChecked && aporteMensal > 0) {
-          // Ajuste iterativo para encontrar o aporte que resulta no valor líquido desejado
-          for (let iter = 0; iter < 10; iter++) {
-            let saldoTemp = valorInicial;
-            for (let i = 1; i <= meses; i++) {
-              saldoTemp = saldoTemp * (1 + taxaMensal) + aporteMensal;
-            }
-            const totalInvestidoTemp = valorInicial + (aporteMensal * meses);
-            const rendimentoTemp = saldoTemp - totalInvestidoTemp;
-            const aliquotaIR = calcularAliquotaIR(meses);
-            const irTemp = rendimentoTemp * aliquotaIR;
-            const valorLiquidoTemp = saldoTemp - irTemp;
-            
-            const erro = valorLiquidoTemp - valorFinal;
-            if (Math.abs(erro) < 1) break; // Precisão de R$ 1,00
-            
-            // Ajusta o aporte
-            aporteMensal += erro / meses;
-          }
-        }
-        
-        // Recalcula o valor final real com o aporte ajustado
-        let saldoFinal = valorInicial;
-        for (let i = 1; i <= meses; i++) {
-          saldoFinal = saldoFinal * (1 + taxaMensal) + aporteMensal;
-        }
-        
-        const totalInvestido = valorInicial + (aporteMensal * meses);
-        const rendimentoBruto = saldoFinal - totalInvestido;
-        
-        // Se aporte calculado for negativo, significa que o valor inicial já supera o objetivo
-        if (aporteMensal < 0) {
-          mensagemResultado = 'O valor inicial já é suficiente para atingir seu objetivo!\n\n';
-          mensagemResultado += 'Com a taxa informada, seu investimento inicial de R$ ' + 
-            valorInicial.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + 
-            ' chegará a R$ ' + valorFinalInicial.toLocaleString('pt-BR', {minimumFractionDigits: 2}) +
-            ' no período especificado.';
-          aporteMensal = 0;
-        } else {
-          mensagemResultado = 'Aporte mensal necessário: R$ ' + 
-            aporteMensal.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n\n';
-          
-          if (calcularIRChecked && rendimentoBruto > 0) {
-            const aliquotaIR = calcularAliquotaIR(meses);
-            const valorIR = rendimentoBruto * aliquotaIR;
-            const valorLiquido = saldoFinal - valorIR;
-            
-            mensagemResultado += 'Valor final bruto: R$ ' + saldoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-            mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-            mensagemResultado += 'Rendimento bruto: R$ ' + rendimentoBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-            mensagemResultado += 'Alíquota IR: ' + (aliquotaIR * 100).toLocaleString('pt-BR', {minimumFractionDigits: 1}) + '%\n';
-            mensagemResultado += 'Imposto de Renda: R$ ' + valorIR.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-            mensagemResultado += 'Valor final líquido: R$ ' + valorLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-          } else {
-            mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-            mensagemResultado += 'Rendimento: R$ ' + rendimentoBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-          }
-        }
-        
-        // Gera histórico
-        let saldo = valorInicial;
-        historico.push(saldo);
-        for (let i = 1; i <= meses; i++) {
-          saldo = saldo * (1 + taxaMensal) + aporteMensal;
-          historico.push(saldo);
-        }
-        
-      } else if (calcularOpcao === 'inicial') {
+      if (calcularOpcao === 'inicial') {
         // Calcular valor inicial necessário (sem aportes mensais)
         const taxaAnual = extrairValorNumerico(document.getElementById('taxaSemAporte').value, 'porcentagem') / 100;
         const taxaMensal = Math.pow(1 + taxaAnual, 1/12) - 1;
         
         // Fórmula: PV = FV / (1 + i)^n
-        const fatorDesconto = Math.pow(1 + taxaMensal, meses);
-        let valorInicialNecessario = valorFinal / fatorDesconto;
+        const fatorCrescimento = Math.pow(1 + taxaMensal, meses);
+        
+        let valorInicialNecessario;
         
         // Se considerar IR, precisamos ajustar
         if (calcularIRChecked) {
           const aliquotaIR = calcularAliquotaIR(meses);
-          // Ajuste iterativo para encontrar o valor inicial que resulta no valor líquido desejado
-          for (let iter = 0; iter < 20; iter++) {
-            const valorFinalBruto = valorInicialNecessario * fatorDesconto;
-            const rendimentoBruto = valorFinalBruto - valorInicialNecessario;
-            const irTemp = rendimentoBruto * aliquotaIR;
-            const valorLiquidoTemp = valorFinalBruto - irTemp;
-            
-            const erro = valorLiquidoTemp - valorFinal;
-            if (Math.abs(erro) < 1) break; // Precisão de R$ 1,00
-            
-            // Ajusta o valor inicial
-            valorInicialNecessario += erro / fatorDesconto;
-          }
+          
+          // Precisamos encontrar PV tal que: PV * fator - (PV * fator - PV) * aliquota = valorFinal
+          // PV * fator - PV * fator * aliquota + PV * aliquota = valorFinal
+          // PV * (fator - fator * aliquota + aliquota) = valorFinal
+          // PV * (fator * (1 - aliquota) + aliquota) = valorFinal
+          // PV = valorFinal / (fator * (1 - aliquota) + aliquota)
+          
+          valorInicialNecessario = valorFinal / (fatorCrescimento * (1 - aliquotaIR) + aliquotaIR);
+        } else {
+          valorInicialNecessario = valorFinal / fatorCrescimento;
         }
         
-        const valorFinalBruto = valorInicialNecessario * fatorDesconto;
+        const valorFinalBruto = valorInicialNecessario * fatorCrescimento;
         const rendimentoBruto = valorFinalBruto - valorInicialNecessario;
         
         mensagemResultado = 'Valor inicial necessário: R$ ' + 
@@ -941,6 +824,22 @@
         // Calcular taxa de juros necessária
         const aporteMensal = extrairValorNumerico(document.getElementById('aporteFixo').value, 'moeda');
         
+        // Ajustar valor final se considerar IR
+        let valorFinalAlvo = valorFinal;
+        if (calcularIRChecked) {
+          // Precisamos encontrar um valor final bruto que, após descontar o IR, resulte no valor líquido desejado
+          // Isso requer iteração porque a taxa de IR depende do período (que já conhecemos)
+          // e o rendimento depende do valor final bruto
+          const aliquotaIR = calcularAliquotaIR(meses);
+          const totalInvestido = valorInicial + (aporteMensal * meses);
+          
+          // Fórmula: VF_liquido = VF_bruto - (VF_bruto - Total_Investido) * aliquota
+          // VF_liquido = VF_bruto - VF_bruto * aliquota + Total_Investido * aliquota
+          // VF_liquido = VF_bruto * (1 - aliquota) + Total_Investido * aliquota
+          // VF_bruto = (VF_liquido - Total_Investido * aliquota) / (1 - aliquota)
+          valorFinalAlvo = (valorFinal - totalInvestido * aliquotaIR) / (1 - aliquotaIR);
+        }
+        
         // Cálculo iterativo da taxa (usando método de Newton-Raphson simplificado)
         let taxaMensal = 0.01; // Chute inicial: 1% ao mês
         const precisao = 0.0001;
@@ -956,7 +855,7 @@
             saldo = saldo * (1 + taxaMensal) + aporteMensal;
           }
           
-          const erro = saldo - valorFinal;
+          const erro = saldo - valorFinalAlvo;
           
           if (Math.abs(erro) < precisao) break;
           
@@ -973,8 +872,16 @@
         
         const taxaAnualCalculada = (Math.pow(1 + taxaMensal, 12) - 1) * 100;
         
-        // Verifica se é possível atingir o objetivo
+        // Calcula valores finais para exibição
+        let saldoFinalBruto = valorInicial;
+        for (let i = 1; i <= meses; i++) {
+          saldoFinalBruto = saldoFinalBruto * (1 + taxaMensal) + aporteMensal;
+        }
+        
         const totalInvestido = valorInicial + (aporteMensal * meses);
+        const rendimentoBruto = saldoFinalBruto - totalInvestido;
+        
+        // Verifica se é possível atingir o objetivo
         if (totalInvestido > valorFinal) {
           mensagemResultado = 'Atenção: O valor final desejado é menor que o total a ser investido!\n\n';
           mensagemResultado += 'Total a investir: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
@@ -982,9 +889,22 @@
         } else {
           mensagemResultado = 'Taxa de juros necessária: ' + 
             taxaAnualCalculada.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '% ao ano\n\n';
-          mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
-          mensagemResultado += 'Rendimento: R$ ' + 
-            (valorFinal - totalInvestido).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+          
+          if (calcularIRChecked && rendimentoBruto > 0) {
+            const aliquotaIR = calcularAliquotaIR(meses);
+            const valorIR = rendimentoBruto * aliquotaIR;
+            const valorLiquido = saldoFinalBruto - valorIR;
+            
+            mensagemResultado += 'Valor final bruto: R$ ' + saldoFinalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+            mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+            mensagemResultado += 'Rendimento bruto: R$ ' + rendimentoBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+            mensagemResultado += 'Alíquota IR: ' + (aliquotaIR * 100).toLocaleString('pt-BR', {minimumFractionDigits: 1}) + '%\n';
+            mensagemResultado += 'Imposto de Renda: R$ ' + valorIR.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+            mensagemResultado += 'Valor final líquido: R$ ' + valorLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+          } else {
+            mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+            mensagemResultado += 'Rendimento: R$ ' + rendimentoBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+          }
         }
         
         // Gera histórico
@@ -1068,7 +988,7 @@
       });
       
       // Event listeners para modo planejamento
-      const camposPlan = ['valorFinalDesejado', 'valorInicialPlan', 'periodoPlan', 'periodoTipoPlan', 'taxaFixa', 'aporteFixo', 'taxaSemAporte', 'calcularIRPlan'];
+      const camposPlan = ['valorFinalDesejado', 'valorInicialPlan', 'periodoPlan', 'periodoTipoPlan', 'aporteFixo', 'taxaSemAporte', 'calcularIRPlan'];
       
       camposPlan.forEach(campoId => {
         const campo = document.getElementById(campoId);
