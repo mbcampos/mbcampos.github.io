@@ -131,6 +131,46 @@
       background-color: #fdf2f2;
     }
 
+    /* Abas de modo de cálculo */
+    .modo-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modo-tab {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modo-tab:hover {
+      color: #3949ab;
+      background: #f5f5f5;
+    }
+
+    .modo-tab.ativo {
+      color: #3949ab;
+      border-bottom-color: #3949ab;
+      background: #f5f5f5;
+    }
+
+    .modo-conteudo {
+      display: none;
+    }
+
+    .modo-conteudo.ativo {
+      display: block;
+    }
+
     canvas {
       margin-top: 20px;
       max-width: 100%;
@@ -211,6 +251,10 @@
       canvas {
         margin-top: 15px;
       }
+      .modo-tab {
+        font-size: 13px;
+        padding: 10px 8px;
+      }
     }
 
     /* RESPONSIVIDADE PARA SMARTPHONES PEQUENOS */
@@ -288,33 +332,86 @@
     <h1>Calculadora de Juros Compostos</h1>
     <p>Simule o crescimento do seu investimento com juros compostos.</p>
 
-    <div class="input-group">
-      <label>Valor inicial (R$)</label>
-      <input type="text" id="valorInicial" placeholder="R$ 10.000,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
+    <!-- Abas de seleção de modo -->
+    <div class="modo-tabs">
+      <button class="modo-tab ativo" onclick="alternarModo('calcular')">Calcular Valor Final</button>
+      <button class="modo-tab" onclick="alternarModo('planejamento')">Planejar Investimento</button>
     </div>
 
-    <div class="input-group">
-      <label>Valor mensal (R$)</label>
-      <input type="text" id="valorMensal" placeholder="R$ 500,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
-    </div>
-
-    <div class="input-group">
-      <label>Taxa de juros (% ao ano)</label>
-      <input type="text" id="taxaJuros" placeholder="12,50%" oninput="aplicarMascaraPorcentagem(this)" onblur="aplicarMascaraPorcentagem(this)">
-    </div>
-
-    <div class="input-group">
-      <label>Período</label>
-      <div class="periodo-group">
-        <select id="periodoTipo">
-          <option value="anos">Anos</option>
-          <option value="meses">Meses</option>
-        </select>
-        <input type="number" id="periodo" placeholder="Ex: 5">
+    <!-- Modo 1: Calcular valor final (modo atual) -->
+    <div id="modo-calcular" class="modo-conteudo ativo">
+      <div class="input-group">
+        <label>Valor inicial (R$)</label>
+        <input type="text" id="valorInicial" placeholder="R$ 10.000,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
       </div>
+
+      <div class="input-group">
+        <label>Valor mensal (R$)</label>
+        <input type="text" id="valorMensal" placeholder="R$ 500,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
+      </div>
+
+      <div class="input-group">
+        <label>Taxa de juros (% ao ano)</label>
+        <input type="text" id="taxaJuros" placeholder="12,50%" oninput="aplicarMascaraPorcentagem(this)" onblur="aplicarMascaraPorcentagem(this)">
+      </div>
+
+      <div class="input-group">
+        <label>Período</label>
+        <div class="periodo-group">
+          <select id="periodoTipo">
+            <option value="anos">Anos</option>
+            <option value="meses">Meses</option>
+          </select>
+          <input type="number" id="periodo" placeholder="Ex: 5">
+        </div>
+      </div>
+
+      <button class="btn" onclick="calcular()">Calcular</button>
     </div>
 
-    <button class="btn" onclick="calcular()">Calcular</button>
+    <!-- Modo 2: Planejar investimento (novo) -->
+    <div id="modo-planejamento" class="modo-conteudo">
+      <div class="input-group">
+        <label>Valor final desejado (R$)</label>
+        <input type="text" id="valorFinalDesejado" placeholder="R$ 100.000,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
+      </div>
+
+      <div class="input-group">
+        <label>Valor inicial disponível (R$)</label>
+        <input type="text" id="valorInicialPlan" placeholder="R$ 10.000,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
+      </div>
+
+      <div class="input-group">
+        <label>Período</label>
+        <div class="periodo-group">
+          <select id="periodoTipoPlan">
+            <option value="anos">Anos</option>
+            <option value="meses">Meses</option>
+          </select>
+          <input type="number" id="periodoPlan" placeholder="Ex: 5">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Calcular:</label>
+        <select id="calcularOpcao">
+          <option value="aporte">Aporte mensal necessário (com taxa fixa)</option>
+          <option value="taxa">Taxa de juros necessária (com aporte fixo)</option>
+        </select>
+      </div>
+
+      <div class="input-group" id="taxaFixaGroup">
+        <label>Taxa de juros estimada (% ao ano)</label>
+        <input type="text" id="taxaFixa" placeholder="12,50%" oninput="aplicarMascaraPorcentagem(this)" onblur="aplicarMascaraPorcentagem(this)">
+      </div>
+
+      <div class="input-group" id="aporteFixoGroup" style="display: none;">
+        <label>Aporte mensal fixo (R$)</label>
+        <input type="text" id="aporteFixo" placeholder="R$ 500,00" oninput="aplicarMascaraMoeda(this)" onblur="aplicarMascaraMoeda(this)">
+      </div>
+
+      <button class="btn" onclick="calcularPlanejamento()">Calcular Planejamento</button>
+    </div>
 
     <div class="erro" id="erro"></div>
 
@@ -325,6 +422,44 @@
 
   <script>
     let chart;
+    let modoAtual = 'calcular';
+
+    // Função para alternar entre modos
+    function alternarModo(modo) {
+      // Atualiza modo atual
+      modoAtual = modo;
+      
+      // Limpa resultados e erros
+      limparResultado();
+      limparErros();
+      
+      // Atualiza abas
+      document.querySelectorAll('.modo-tab').forEach(tab => {
+        tab.classList.remove('ativo');
+      });
+      event.target.classList.add('ativo');
+      
+      // Atualiza conteúdo
+      document.querySelectorAll('.modo-conteudo').forEach(conteudo => {
+        conteudo.classList.remove('ativo');
+      });
+      document.getElementById('modo-' + modo).classList.add('ativo');
+    }
+
+    // Função para alternar campos no modo planejamento
+    function atualizarCamposPlanejamento() {
+      const opcao = document.getElementById('calcularOpcao').value;
+      const taxaFixaGroup = document.getElementById('taxaFixaGroup');
+      const aporteFixoGroup = document.getElementById('aporteFixoGroup');
+      
+      if (opcao === 'aporte') {
+        taxaFixaGroup.style.display = 'block';
+        aporteFixoGroup.style.display = 'none';
+      } else {
+        taxaFixaGroup.style.display = 'none';
+        aporteFixoGroup.style.display = 'block';
+      }
+    }
 
     // Função para aplicar máscara de moeda
     function aplicarMascaraMoeda(input) {
@@ -501,7 +636,7 @@
       // Converter juros anual para mensal
       let taxaMensal = Math.pow(1 + taxaJuros, 1/12) - 1;
 
-      let historico = [];
+      const historico = [];
       let saldo = valorInicial;
       historico.push(saldo);
 
@@ -515,6 +650,172 @@
         "Valor final: R$ " + saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
       elementoResultado.style.display = 'block'; // Mostra o resultado
 
+      // Cria gráfico
+      criarGrafico(historico, meses);
+    }
+
+    // Função para calcular planejamento (modo reverso)
+    function calcularPlanejamento() {
+      // Limpa erros anteriores
+      limparErros();
+      
+      const valorFinal = extrairValorNumerico(document.getElementById('valorFinalDesejado').value, 'moeda');
+      const valorInicial = extrairValorNumerico(document.getElementById('valorInicialPlan').value, 'moeda');
+      const periodo = parseInt(document.getElementById('periodoPlan').value) || 0;
+      const periodoTipo = document.getElementById('periodoTipoPlan').value;
+      const calcularOpcao = document.getElementById('calcularOpcao').value;
+      
+      // Validação básica
+      let erros = [];
+      
+      if (!valorFinal || valorFinal <= 0) {
+        document.getElementById('valorFinalDesejado').classList.add('erro-campo');
+        erros.push('Valor final desejado');
+      }
+      
+      if (!periodo || periodo <= 0) {
+        document.getElementById('periodoPlan').classList.add('erro-campo');
+        erros.push('Período');
+      }
+      
+      if (calcularOpcao === 'aporte') {
+        const taxaFixa = extrairValorNumerico(document.getElementById('taxaFixa').value, 'porcentagem');
+        if (!taxaFixa || taxaFixa <= 0) {
+          document.getElementById('taxaFixa').classList.add('erro-campo');
+          erros.push('Taxa de juros estimada');
+        }
+      } else {
+        const aporteFixo = extrairValorNumerico(document.getElementById('aporteFixo').value, 'moeda');
+        if (!aporteFixo || aporteFixo <= 0) {
+          document.getElementById('aporteFixo').classList.add('erro-campo');
+          erros.push('Aporte mensal fixo');
+        }
+      }
+      
+      if (erros.length > 0) {
+        exibirErro(erros);
+        limparResultado();
+        return;
+      }
+      
+      // Definir meses
+      const meses = periodoTipo === "anos" ? periodo * 12 : periodo;
+      
+      let mensagemResultado = '';
+      let historico = [];
+      
+      if (calcularOpcao === 'aporte') {
+        // Calcular aporte mensal necessário
+        const taxaAnual = extrairValorNumerico(document.getElementById('taxaFixa').value, 'porcentagem') / 100;
+        const taxaMensal = Math.pow(1 + taxaAnual, 1/12) - 1;
+        
+        // Fórmula: PMT = (FV - PV * (1 + i)^n) / (((1 + i)^n - 1) / i)
+        const fatorCrescimento = Math.pow(1 + taxaMensal, meses);
+        const valorFinalInicial = valorInicial * fatorCrescimento;
+        const diferenca = valorFinal - valorFinalInicial;
+        
+        let aporteMensal = 0;
+        if (taxaMensal > 0) {
+          aporteMensal = diferenca / ((fatorCrescimento - 1) / taxaMensal);
+        } else {
+          aporteMensal = diferenca / meses;
+        }
+        
+        // Se aporte calculado for negativo, significa que o valor inicial já supera o objetivo
+        if (aporteMensal < 0) {
+          mensagemResultado = 'O valor inicial já é suficiente para atingir seu objetivo!\n\n';
+          mensagemResultado += 'Com a taxa informada, seu investimento inicial de R$ ' + 
+            valorInicial.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + 
+            ' chegará a R$ ' + valorFinalInicial.toLocaleString('pt-BR', {minimumFractionDigits: 2}) +
+            ' no período especificado.';
+          aporteMensal = 0;
+        } else {
+          mensagemResultado = 'Aporte mensal necessário: R$ ' + 
+            aporteMensal.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n\n';
+          mensagemResultado += 'Total investido: R$ ' + 
+            (valorInicial + (aporteMensal * meses)).toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+          mensagemResultado += 'Rendimento: R$ ' + 
+            (valorFinal - valorInicial - (aporteMensal * meses)).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+        
+        // Gera histórico
+        let saldo = valorInicial;
+        historico.push(saldo);
+        for (let i = 1; i <= meses; i++) {
+          saldo = saldo * (1 + taxaMensal) + aporteMensal;
+          historico.push(saldo);
+        }
+        
+      } else {
+        // Calcular taxa de juros necessária
+        const aporteMensal = extrairValorNumerico(document.getElementById('aporteFixo').value, 'moeda');
+        
+        // Cálculo iterativo da taxa (usando método de Newton-Raphson simplificado)
+        let taxaMensal = 0.01; // Chute inicial: 1% ao mês
+        const precisao = 0.0001;
+        const maxIteracoes = 1000;
+        
+        for (let iter = 0; iter < maxIteracoes; iter++) {
+          let saldo = valorInicial;
+          let derivada = 0;
+          
+          // Calcula o valor final com a taxa atual
+          for (let i = 1; i <= meses; i++) {
+            derivada += saldo * i;
+            saldo = saldo * (1 + taxaMensal) + aporteMensal;
+          }
+          
+          const erro = saldo - valorFinal;
+          
+          if (Math.abs(erro) < precisao) break;
+          
+          // Ajusta a taxa
+          if (derivada !== 0) {
+            taxaMensal -= erro / derivada;
+          } else {
+            break;
+          }
+          
+          // Garante que a taxa não fique negativa
+          if (taxaMensal < 0) taxaMensal = 0.0001;
+        }
+        
+        const taxaAnualCalculada = (Math.pow(1 + taxaMensal, 12) - 1) * 100;
+        
+        // Verifica se é possível atingir o objetivo
+        const totalInvestido = valorInicial + (aporteMensal * meses);
+        if (totalInvestido > valorFinal) {
+          mensagemResultado = 'Atenção: O valor final desejado é menor que o total a ser investido!\n\n';
+          mensagemResultado += 'Total a investir: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+          mensagemResultado += 'Valor final desejado: R$ ' + valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        } else {
+          mensagemResultado = 'Taxa de juros necessária: ' + 
+            taxaAnualCalculada.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '% ao ano\n\n';
+          mensagemResultado += 'Total investido: R$ ' + totalInvestido.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '\n';
+          mensagemResultado += 'Rendimento: R$ ' + 
+            (valorFinal - totalInvestido).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+        
+        // Gera histórico
+        let saldo = valorInicial;
+        historico.push(saldo);
+        for (let i = 1; i <= meses; i++) {
+          saldo = saldo * (1 + taxaMensal) + aporteMensal;
+          historico.push(saldo);
+        }
+      }
+      
+      // Exibe resultado
+      const elementoResultado = document.getElementById('resultado');
+      elementoResultado.innerText = mensagemResultado;
+      elementoResultado.style.display = 'block';
+      
+      // Cria gráfico
+      criarGrafico(historico, meses);
+    }
+
+    // Função auxiliar para criar o gráfico
+    function criarGrafico(historico, meses) {
       // Criar labels dos meses
       let labels = [];
       for (let i = 0; i <= meses; i++) {
@@ -566,11 +867,36 @@
       
       campos.forEach(campoId => {
         const campo = document.getElementById(campoId);
-        campo.addEventListener('input', function() {
+        if (campo) {
+          campo.addEventListener('input', function() {
+            limparResultado();
+            limparErros();
+          });
+        }
+      });
+      
+      // Event listeners para modo planejamento
+      const camposPlan = ['valorFinalDesejado', 'valorInicialPlan', 'periodoPlan', 'periodoTipoPlan', 'taxaFixa', 'aporteFixo'];
+      
+      camposPlan.forEach(campoId => {
+        const campo = document.getElementById(campoId);
+        if (campo) {
+          campo.addEventListener('input', function() {
+            limparResultado();
+            limparErros();
+          });
+        }
+      });
+      
+      // Event listener para alternância de opção de cálculo
+      const calcularOpcao = document.getElementById('calcularOpcao');
+      if (calcularOpcao) {
+        calcularOpcao.addEventListener('change', function() {
+          atualizarCamposPlanejamento();
           limparResultado();
           limparErros();
         });
-      });
+      }
     });
   </script>
 </body>
