@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Idade Canina</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: none;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .card-header .subtitle {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 40px;
+            background-color: #ffffff;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-select, .form-control {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-card {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-age {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 20px 0;
+        }
+
+        .result-text {
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .info-section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-section h5 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .info-section p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .dog-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .weight-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .weight-badge {
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .weight-badge strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-dog dog-icon"></i>
+                <h1>Calculadora de Idade Canina</h1>
+                <p class="subtitle">Nova escala baseada na AFFP - Envelhecimento real do corpo</p>
+            </div>
+            <div class="card-body">
+                <form id="dogAgeForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dogAge" class="form-label">
+                                <i class="fas fa-calendar-alt"></i> Idade do cachorro (anos)
+                            </label>
+                            <input type="number" class="form-control" id="dogAge" min="1" max="20" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dogWeight" class="form-label">
+                                <i class="fas fa-weight"></i> Porte do cachorro
+                            </label>
+                            <select class="form-select" id="dogWeight" required>
+                                <option value="">Selecione o porte</option>
+                                <option value="small">Pequeno (até 9,07 kg)</option>
+                                <option value="medium">Médio (9,52 - 22,7 kg)</option>
+                                <option value="large">Grande (23,1 - 40,8 kg)</option>
+                                <option value="giant">Gigante (mais de 40,8 kg)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-calculate">
+                        <i class="fas fa-calculator"></i> Calcular Idade Humana
+                    </button>
+                </form>
+
+                <div id="result" class="result-card">
+                    <i class="fas fa-birthday-cake" style="font-size: 3rem; color: #764ba2;"></i>
+                    <div class="result-age" id="humanAge">0</div>
+                    <div class="result-text">anos em idade humana</div>
+                    <p style="margin-top: 15px; color: #666;">
+                        Seu cachorro de <span id="dogYears"></span> anos 
+                        (porte <span id="dogSize"></span>) 
+                        equivale a <span id="humanYears"></span> anos humanos
+                    </p>
+                </div>
+
+                <div class="info-section">
+                    <h5><i class="fas fa-info-circle"></i> Sobre a nova tabela</h5>
+                    <p>
+                        A nova tabela da AFFP (AAHA/Dog Owner's Home Veterinary Handbook - Zoetis US) 
+                        atualizou o cálculo com base em estudos genéticos e fisiológicos. 
+                        Agora, a idade canina é comparada ao envelhecimento real do corpo, 
+                        não só ao tempo cronológico.
+                    </p>
+                    <div class="weight-categories">
+                        <div class="weight-badge">
+                            <strong>Pequeno</strong>
+                            ≤ 9,07 kg
+                        </div>
+                        <div class="weight-badge">
+                            <strong>Médio</strong>
+                            9,52 - 22,7 kg
+                        </div>
+                        <div class="weight-badge">
+                            <strong>Grande</strong>
+                            23,1 - 40,8 kg
+                        </div>
+                        <div class="weight-badge">
+                            <strong>Gigante</strong>
+                            > 40,8 kg
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tabela de conversão baseada na imagem fornecida
+        const ageTable = {
+            1: { small: 15, medium: 15, large: 15, giant: 15 },
+            2: { small: 24, medium: 24, large: 24, giant: 24 },
+            3: { small: 28, medium: 28, large: 30, giant: 32 },
+            4: { small: 32, medium: 33, large: 35, giant: 37 },
+            5: { small: 36, medium: 37, large: 40, giant: 42 },
+            6: { small: 40, medium: 42, large: 45, giant: 49 },
+            7: { small: 44, medium: 47, large: 50, giant: 56 },
+            8: { small: 48, medium: 51, large: 55, giant: 64 },
+            9: { small: 52, medium: 56, large: 61, giant: 71 },
+            10: { small: 56, medium: 60, large: 66, giant: 78 },
+            11: { small: 60, medium: 65, large: 72, giant: 86 },
+            12: { small: 64, medium: 69, large: 77, giant: 93 },
+            13: { small: 68, medium: 74, large: 82, giant: 101 },
+            14: { small: 72, medium: 78, large: 88, giant: 108 },
+            15: { small: 76, medium: 83, large: 93, giant: 115 },
+            16: { small: 80, medium: 87, large: 99, giant: 123 },
+            17: { small: 84, medium: 92, large: 104, giant: null },
+            18: { small: 88, medium: 96, large: 109, giant: null },
+            19: { small: 92, medium: 101, large: 115, giant: null },
+            20: { small: 96, medium: 105, large: 120, giant: null }
+        };
+
+        const sizeNames = {
+            small: 'pequeno',
+            medium: 'médio',
+            large: 'grande',
+            giant: 'gigante'
+        };
+
+        document.getElementById('dogAgeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const age = parseInt(document.getElementById('dogAge').value);
+            const weight = document.getElementById('dogWeight').value;
+            
+            if (!age || !weight) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            if (age < 1 || age > 20) {
+                alert('Por favor, insira uma idade entre 1 e 20 anos.');
+                return;
+            }
+
+            const humanAge = ageTable[age][weight];
+            
+            if (humanAge === null) {
+                alert('Não há dados disponíveis para esta combinação de idade e porte.');
+                return;
+            }
+
+            // Exibir resultado
+            document.getElementById('humanAge').textContent = humanAge;
+            document.getElementById('dogYears').textContent = age;
+            document.getElementById('dogSize').textContent = sizeNames[weight];
+            document.getElementById('humanYears').textContent = humanAge;
+            
+            const resultCard = document.getElementById('result');
+            resultCard.classList.add('show');
+            
+            // Scroll suave até o resultado
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        // Limpar resultado quando mudar os campos
+        document.getElementById('dogAge').addEventListener('input', function() {
+            document.getElementById('result').classList.remove('show');
+        });
+
+        document.getElementById('dogWeight').addEventListener('change', function() {
+            document.getElementById('result').classList.remove('show');
+        });
+    </script>
+</body>
+</html>
