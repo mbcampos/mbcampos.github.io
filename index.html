@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matheus Campos — Projetos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f8fafc;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(71, 85, 105, 0.4);
+      border-radius: 14px;
+      padding: 1.8rem 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .card:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(99, 102, 241, 0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.15);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+      background: linear-gradient(90deg, #6366f1, #a78bfa, #6366f1);
+    }
+
+    .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      font-size: 1.4rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .icon-ponto    { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+    .icon-horas    { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+    .icon-dog      { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+    .icon-juros    { background: rgba(139, 92, 246, 0.18); color: #a78bfa; }
+
+    .card h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #f1f5f9;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 3.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    footer a {
+      color: #818cf8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: #a5b4fc;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>Matheus Campos</h1>
+    <p>Ferramentas e utilitários web</p>
+  </header>
+
+  <div class="grid">
+
+    <a href="horastrabalhadas/" class="card">
+      <div class="icon icon-horas">&#x23F1;</div>
+      <h2>Horas Trabalhadas</h2>
+      <p>Registro e acompanhamento mensal de jornada de trabalho com navegação entre meses.</p>
+    </a>
+
+    <a href="juroscompostos/" class="card">
+      <div class="icon icon-juros">&#x1F4C8;</div>
+      <h2>Juros Compostos</h2>
+      <p>Simulador financeiro para projetar investimentos com aportes, taxa e desconto de IR.</p>
+    </a>
+
+    <a href="folhaponto/" class="card">
+      <div class="icon icon-ponto">&#x1F4C4;</div>
+      <h2>Folha de Ponto</h2>
+      <p>Gerador de folha de ponto mensal A4 com entrada, saída e almoço. Exportável para PDF.</p>
+    </a>
+
+    <a href="idadecachorro/" class="card">
+      <div class="icon icon-dog">&#x1F436;</div>
+      <h2>Idade de Cachorro</h2>
+      <p>Calculadora de idade canina em "anos humanos" por porte, baseada na tabela AAFP.</p>
+    </a>
+
+  </div>
+
+  <footer>
+    Hospedado via <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
