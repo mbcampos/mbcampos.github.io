@@ -5,13 +5,16 @@ var App = App || {};
 
   var calc = App.Calculator;
 
-  function exportToTxt(allMonths, defaultConfig) {
+  function exportToTxt(allMonths, defaultConfig, employeeName) {
     var lines = [];
     var now = new Date();
     var dateStr = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     lines.push('# SISTEMA DE HORAS TRABALHADAS - EXPORTACAO');
     lines.push('# Data: ' + dateStr);
+    if (employeeName) {
+      lines.push('# FUNCIONARIO: ' + employeeName);
+    }
     lines.push('# ================================================');
     lines.push('# MES | DIA | DIA_SEMANA | ENTRADA | SAIDA_ALMOCO | RETORNO_ALMOCO | SAIDA | ABONADO | FALTA | FERIAS | CARGA | HORAS | SALDO');
 
@@ -83,12 +86,20 @@ var App = App || {};
     var defaultConfig = null;
     var errors = [];
     var currentMonthKey = null;
+    var employeeName = '';
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].trim();
       if (!line) continue;
 
       if (line.startsWith('#')) {
+        if (line.indexOf('FUNCIONARIO:') !== -1) {
+          var nameMatch = line.match(/# FUNCIONARIO:\s*(.+)/);
+          if (nameMatch) {
+            employeeName = nameMatch[1].trim();
+          }
+          continue;
+        }
         if (!defaultConfig && line.indexOf('CONFIG') === -1) {
           var dc = parseConfigLine(line);
           if (dc.standardHoursPerDay !== 8 || dc.saturdayHours !== 4 || dc.sundayHours !== 0) {
@@ -158,7 +169,7 @@ var App = App || {};
       };
     }
 
-    return { months: months, defaultConfig: defaultConfig, errors: errors };
+    return { months: months, defaultConfig: defaultConfig, errors: errors, employeeName: employeeName };
   }
 
   function downloadTxt(content, filename) {
@@ -187,7 +198,8 @@ var App = App || {};
           if (mergeMode === 'replace') {
             var newData = {
               months: result.months,
-              defaultConfig: result.defaultConfig || App.Storage.getDefaultConfig()
+              defaultConfig: result.defaultConfig || App.Storage.getDefaultConfig(),
+              employeeName: result.employeeName || ''
             };
             App.Storage.replaceAllData(newData);
           } else {

@@ -61,7 +61,8 @@ Chave: `horasTrabalhadas`
     "saturdayHours": 4,
     "sundayHours": 0,
     "workingDays": [1, 2, 3, 4, 5]
-  }
+  },
+  "employeeName": "João Silva"
 }
 ```
 
@@ -76,16 +77,16 @@ para máquina quanto para humanos abrirem no Excel/Bloco de Notas.
 ```
 # SISTEMA DE HORAS TRABALHADAS - EXPORTAÇÃO
 # Data: 05/07/2026 14:30
-# Config: cargaHoraria=8h
+# FUNCIONARIO: João Silva
 # ================================================
-# MES | DIA | DIA_SEMANA | ENTRADA | SAIDA_ALMOCO | RETORNO_ALMOCO | SAIDA | HORAS | SALDO
-2026-01|1|Seg|08:00|12:00|13:00|17:00|8,0|0,0
-2026-01|2|Ter|08:15|12:00|13:00|18:30|9,2|1,2
-2026-01|3|Qua|08:00|12:00|13:00|17:00|8,0|0,0
+# MES | DIA | DIA_SEMANA | ENTRADA | SAIDA_ALMOCO | RETORNO_ALMOCO | SAIDA | ABONADO | FALTA | FERIAS | CARGA | HORAS | SALDO
+2026-01|1|Seg|08:00|12:00|13:00|17:00|||||8,0|0,0
+2026-01|2|Ter|08:15|12:00|13:00|18:30|||||9,2|1,2
+2026-01|3|Qua|08:00|12:00|13:00|17:00|||||8,0|0,0
 ...
 # TOTAIS DO MÊS 2026-01: 176,0h | Saldo: +8,0h
 # ================================================
-2026-02|1|Qui|08:00|17:00|8,0|0,0
+2026-02|1|Qui|08:00|||17:00|||||8,0|0,0
 ...
 # TOTAIS DO MÊS 2026-02: 160,0h | Saldo: 0,0h
 # ================================================
@@ -94,7 +95,10 @@ para máquina quanto para humanos abrirem no Excel/Bloco de Notas.
 
 **Regras do formato:**
 - Linhas iniciadas com `#` são comentários/metadados (ignoradas na importação)
-- Cada linha de dados tem 9 campos: `MES|DIA|DIA_SEMANA|ENTRADA|SAIDA_ALMOCO|RETORNO_ALMOCO|SAIDA|HORAS|SALDO`
+- `# FUNCIONARIO:` armazena o nome do funcionário e é restaurado na importação (modo substituir)
+- Cada linha de dados tem 13 campos: `MES|DIA|DIA_SEMANA|ENTRADA|SAIDA_ALMOCO|RETORNO_ALMOCO|SAIDA|ABONADO|FALTA|FERIAS|CARGA|HORAS|SALDO`
+- `ABONADO`, `FALTA` e `FERIAS` são preenchidos com "Sim" quando ativos, vazios caso contrário
+- `CARGA` armazena a carga horária personalizada do dia (vazio se não definida)
 - `HORAS` e `SALDO` são armazenados com vírgula como decimal (padrão pt-BR)
 - `DIA_SEMANA` é informativo na exportação e ignorado na importação (recalculado)
 - `SAIDA_ALMOCO` e `RETORNO_ALMOCO` podem estar vazios (sem intervalo)
@@ -236,13 +240,14 @@ horastrabalhadas/
 
 ### Etapa 8 — Importação/Exportação (.txt) ✅
 - [x] Implementar `io.js`:
-  - [x] `exportToTxt(allMonths, config)` → gera string formatada com todos os meses
-  - [x] `parseTxt(content)` → extrai dados do arquivo .txt, retorna `{ months, config, errors }`
+  - [x] `exportToTxt(allMonths, config, employeeName)` → gera string formatada com todos os meses e nome do funcionário
+  - [x] `parseTxt(content)` → extrai dados do arquivo .txt, retorna `{ months, config, errors, employeeName }`
   - [x] `downloadTxt(content, filename)` → dispara download via `Blob` + link temporário
   - [x] `importFile(file, mergeMode)` → lê arquivo via `FileReader`, faz parse e mescla/substitui
-- [x] Botão "Exportar" na barra de ferramentas → gera e baixa `horas_YYYY-MM-DD.txt`
+- [x] Botão "Exportar" na barra de ferramentas → gera e baixa `horas_primeironome_ultimonome.txt` (ou `horas.txt` se nome vazio)
 - [x] Botão "Importar" → abre seletor de arquivo nativo (`<input type="file" accept=".txt">`)
 - [x] Modal de confirmação ao importar: "Substituir tudo" ou "Mesclar (manter dados existentes)"
+- [x] Nome do funcionário é incluído no arquivo exportado e restaurado na importação (modo substituir)
 
 ## 8. Decisões Técnicas
 

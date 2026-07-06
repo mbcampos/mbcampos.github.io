@@ -259,6 +259,21 @@ var App = App || {};
 
   monthSelector.addEventListener('change', refresh);
 
+  function sanitizeNamePart(str) {
+    return str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  }
+
+  function getFirstLastName(fullName) {
+    var parts = fullName.trim().split(/\s+/);
+    if (parts.length === 0 || fullName.trim() === '') return '';
+    var first = sanitizeNamePart(parts[0]);
+    var last = parts.length > 1 ? sanitizeNamePart(parts[parts.length - 1]) : '';
+    if (last) {
+      return first + '_' + last;
+    }
+    return first;
+  }
+
   document.getElementById('btn-export').addEventListener('click', function () {
     var allMonths = Storage.getAllMonthsWithConfig();
     if (Object.keys(allMonths).length === 0) {
@@ -266,8 +281,10 @@ var App = App || {};
       return;
     }
     var defaultConfig = Storage.getDefaultConfig();
-    var content = App.IO.exportToTxt(allMonths, defaultConfig);
-    var filename = 'horas_' + new Date().toISOString().slice(0, 10) + '.txt';
+    var employeeName = Storage.getEmployeeName();
+    var content = App.IO.exportToTxt(allMonths, defaultConfig, employeeName);
+    var namePrefix = getFirstLastName(employeeName);
+    var filename = namePrefix ? 'horas_' + namePrefix + '.txt' : 'horas.txt';
     App.IO.downloadTxt(content, filename);
   });
 
@@ -302,11 +319,17 @@ var App = App || {};
     importFileInput.value = '';
   });
 
+  function refreshEmployeeNameInput() {
+    var input = document.getElementById('employee-name');
+    input.value = Storage.getEmployeeName();
+  }
+
   document.getElementById('btn-import-replace').addEventListener('click', function () {
     if (!pendingImportFile) return;
     App.IO.importFile(pendingImportFile, 'replace').then(function () {
       importOverlay.classList.add('hidden');
       pendingImportFile = null;
+      refreshEmployeeNameInput();
       initMonthSelector();
       refresh();
     }).catch(function (err) {
