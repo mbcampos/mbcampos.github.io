@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Horas Trabalhadas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1>Sistema de Horas Trabalhadas</h1>
+      <div class="employee-name-row">
+        <label for="employee-name">Funcionário:</label>
+        <input type="text" id="employee-name" placeholder="Nome do funcionário" maxlength="60">
+      </div>
+    </header>
+
+    <div class="controls-bar">
+      <div class="month-nav">
+        <button id="btn-prev" title="Mês anterior">&larr;</button>
+        <input type="month" id="month-selector">
+        <button id="btn-next" title="Próximo mês">&rarr;</button>
+      </div>
+      <div class="toolbar">
+        <button id="btn-import" class="btn-secondary">Importar</button>
+        <button id="btn-export" class="btn-secondary">Exportar</button>
+        <button id="btn-report" class="btn-secondary">Relatório</button>
+        <button id="btn-clear" class="btn-danger">Limpar Mês</button>
+        <button id="btn-config" class="btn-secondary">Configurações</button>
+        <input type="file" id="import-file" accept=".txt" hidden>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="month-table">
+        <thead>
+          <tr>
+            <th>Dia</th>
+            <th>Dia Sem.</th>
+            <th>Entrada</th>
+            <th>Saída Alm.</th>
+            <th>Ret. Alm.</th>
+            <th>Saída</th>
+            <th>Status</th>
+            <th>Carga</th>
+            <th>Horas</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="month-tbody"></tbody>
+        <tfoot id="month-tfoot">
+          <tr class="totals-row">
+            <td colspan="8"><strong>Total do Mês</strong></td>
+            <td id="month-total-hours">0,0h</td>
+            <td id="month-balance">0,0h</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="global-totalizer">
+      <span class="totalizer-label">Totalizador Geral:</span>
+      <span id="global-balance" class="totalizer-value">0,0h</span>
+    </div>
+
+    <div class="saved-months">
+      <h3>Meses Salvos</h3>
+      <div id="saved-months-list" class="months-grid"></div>
+    </div>
+  </div>
+
+  <div id="config-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Configurações</h2>
+        <button class="modal-close" id="btn-config-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cfg-standard-hours">Carga horária diária (horas):</label>
+          <input type="number" id="cfg-standard-hours" min="1" max="24" step="0.5">
+        </div>
+        <div class="form-row">
+          <div class="form-group form-group-half">
+            <label for="cfg-saturday-hours">Carga horária sábado (horas):</label>
+            <input type="number" id="cfg-saturday-hours" min="0" max="24" step="0.5">
+          </div>
+          <div class="form-group form-group-half">
+            <label for="cfg-sunday-hours">Carga horária domingo (horas):</label>
+            <input type="number" id="cfg-sunday-hours" min="0" max="24" step="0.5">
+          </div>
+        </div>
+        <fieldset class="form-group">
+          <legend>Dias úteis da semana:</legend>
+          <div class="weekday-checkboxes">
+            <label><input type="checkbox" value="1" class="cfg-weekday"> Seg</label>
+            <label><input type="checkbox" value="2" class="cfg-weekday"> Ter</label>
+            <label><input type="checkbox" value="3" class="cfg-weekday"> Qua</label>
+            <label><input type="checkbox" value="4" class="cfg-weekday"> Qui</label>
+            <label><input type="checkbox" value="5" class="cfg-weekday"> Sex</label>
+            <label><input type="checkbox" value="6" class="cfg-weekday"> Sáb</label>
+            <label><input type="checkbox" value="0" class="cfg-weekday"> Dom</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-config-save" class="btn-primary">Salvar</button>
+        <button id="btn-config-cancel" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="import-overlay" class="overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Importar Dados</h2>
+        <button class="modal-close" id="btn-import-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Como deseja importar os dados?</p>
+        <div class="import-options">
+          <button id="btn-import-replace" class="btn-primary">Substituir tudo</button>
+          <button id="btn-import-merge" class="btn-secondary">Mesclar (manter dados existentes)</button>
+        </div>
+        <p id="import-error" class="error-msg hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/io.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
