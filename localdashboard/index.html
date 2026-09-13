@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <main class="startpage">
+    <div class="cast">
+
+      <section class="hero">
+        <div class="clock-cluster">
+          <span class="clock" id="clock-h">--</span>
+          <span class="clock-colon">:</span>
+          <span class="clock" id="clock-m">--</span>
+        </div>
+        <div class="date-row mono" id="date">--</div>
+      </section>
+
+      <section class="search-zone">
+        <div class="search-row">
+          <form id="search-form" class="search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input id="search-input" type="text" placeholder="Pesquisar na web ou digitar URL..." autocomplete="off">
+            <kbd class="hotkey mono">/</kbd>
+          </form>
+          <button class="add-fav-btn" id="add-fav-btn" type="button" title="Adicionar favorito">
+            <span class="material-symbols-outlined">add</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="fav-area">
+        <div class="fav-shelf">
+          <nav class="tabs" id="tabs" aria-label="Categorias"></nav>
+
+          <div class="dock-panels" id="panels"></div>
+        </div>
+
+        <div class="manage-link" id="manage-link" role="button" tabindex="0" title="Gerenciar categorias">
+          <span class="material-symbols-outlined">tune</span>
+          <span>Gerenciar categorias</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL FAVORITO -->
+  <div class="overlay" id="bookmark-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Novo Favorito</h3>
+        <button class="icon-btn" id="modal-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="modal-form" id="favorite-form">
+        <div class="field">
+          <label for="f-name">Nome</label>
+          <input id="f-name" type="text" placeholder="Ex: GitHub" required>
+        </div>
+
+        <div class="field">
+          <label for="f-url">URL</label>
+          <div class="url-row">
+            <input id="f-url" type="url" placeholder="https://..." required>
+            <div class="icon-well" id="favicon-preview">
+              <span class="material-symbols-outlined">public</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-category">Categoria</label>
+          <select id="f-category"></select>
+        </div>
+
+        <div class="field">
+          <label for="f-icon">Ícone personalizado (URL, opcional)</label>
+          <input id="f-icon" type="url" placeholder="https://exemplo.com/icone.png">
+        </div>
+
+        <div class="field">
+          <label for="f-service">Serviço de favicon personalizado (opcional)</label>
+          <input id="f-service" type="url" placeholder="https://servico.com/icon?domain={domain}">
+          <span class="field-hint mono">Use {domain} e {url}</span>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-danger" id="f-delete" type="button" hidden>
+            <span class="material-symbols-outlined">delete</span>
+            <span>Excluir</span>
+          </button>
+          <div class="flex-spacer"></div>
+          <button class="btn-ghost" id="f-cancel" type="button">Cancelar</button>
+          <button class="btn-primary" type="submit">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CATEGORIAS -->
+  <div class="overlay" id="manage-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Gerenciar categorias</h3>
+        <button class="icon-btn" id="manage-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="cat-list" id="cat-list"></div>
+
+      <div class="modal-actions">
+        <div class="flex-spacer"></div>
+        <button class="btn-primary" id="manage-done" type="button">Concluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

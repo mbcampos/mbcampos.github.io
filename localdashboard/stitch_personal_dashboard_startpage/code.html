@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>NovaTab Dashboard</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "secondary-fixed-dim": "#4cd7f6",
+          "surface-container-highest": "#313540",
+          "error": "#ffb4ab",
+          "primary-fixed-dim": "#c0c1ff",
+          "surface-bright": "#353944",
+          "on-secondary-fixed-variant": "#004e5c",
+          "primary-container": "#8083ff",
+          "on-secondary-container": "#00424e",
+          "surface-container-low": "#171b26",
+          "tertiary-container": "#00885d",
+          "secondary": "#4cd7f6",
+          "error-container": "#93000a",
+          "on-error": "#690005",
+          "on-primary-fixed": "#07006c",
+          "on-primary-fixed-variant": "#2f2ebe",
+          "tertiary": "#4edea3",
+          "surface-container-lowest": "#0a0e18",
+          "on-surface": "#dfe2f1",
+          "on-tertiary": "#003824",
+          "secondary-fixed": "#acedff",
+          "on-secondary": "#003640",
+          "surface-variant": "#313540",
+          "secondary-container": "#03b5d3",
+          "tertiary-fixed-dim": "#4edea3",
+          "on-surface-variant": "#c7c4d7",
+          "on-secondary-fixed": "#001f26",
+          "outline-variant": "#464554",
+          "on-primary-container": "#0d0096",
+          "tertiary-fixed": "#6ffbbe",
+          "surface": "#0f131d",
+          "surface-dim": "#0f131d",
+          "primary-fixed": "#e1e0ff",
+          "outline": "#908fa0",
+          "on-primary": "#1000a9",
+          "inverse-surface": "#dfe2f1",
+          "surface-container-high": "#262a35",
+          "on-tertiary-fixed": "#002113",
+          "on-tertiary-container": "#000703",
+          "inverse-on-surface": "#2c303b",
+          "on-tertiary-fixed-variant": "#005236",
+          "surface-container": "#1c1f2a",
+          "primary": "#c0c1ff",
+          "on-error-container": "#ffdad6",
+          "inverse-primary": "#494bd6",
+          "surface-tint": "#c0c1ff",
+          "on-background": "#dfe2f1",
+          "background": "#0f131d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-md": "1rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "space-xs": "0.25rem",
+          "gutter": "1.25rem",
+          "margin": "2rem",
+          "space-xl": "2.5rem"
+        },
+        "fontFamily": {
+          "body-sm": ["Inter"],
+          "headline-lg": ["Inter"],
+          "label-md": ["JetBrains Mono"],
+          "display-clock": ["Inter"],
+          "body-md": ["Inter"],
+          "display-clock-mobile": ["Inter"],
+          "headline-md": ["Inter"],
+          "label-lg": ["JetBrains Mono"],
+          "body-lg": ["Inter"],
+          "headline-sm": ["Inter"],
+          "label-sm": ["JetBrains Mono"]
+        },
+        "fontSize": {
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "label-md": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+          "display-clock": ["88px", {"lineHeight": "96px", "letterSpacing": "-0.04em", "fontWeight": "200"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "display-clock-mobile": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "200"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "label-lg": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+          "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "label-sm": ["10px", {"lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen selection:bg-primary selection:text-on-primary"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/70 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1280px] mx-auto px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs group" data-path="dashboard" href="#"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight group-hover:text-primary transition-colors">NovaTab</span><span class="text-outline-variant font-body-sm text-body-sm">/</span><span class="font-body-md text-body-md text-on-surface-variant">Dashboard</span></a><nav class="hidden md:flex items-center gap-space-xs p-space-xs bg-surface-container-lowest/60 rounded-xl" data-active-classes="bg-surface-container-high text-on-surface font-medium"><a aria-current="page" class="px-space-md py-space-xs rounded-lg transition-colors bg-surface-container-high text-on-surface font-medium" data-path="dashboard" href="#">Overview</a><a class="px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bookmarks-manager" href="#">Collections</a><a class="px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="widget-store" href="#">Widgets</a><a class="px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="dashboard-preferences" href="#">Preferences</a></nav></div><div class="flex items-center gap-space-md"><div class="hidden lg:flex items-center gap-space-sm px-space-md py-space-xs rounded-full bg-surface-container-low/70"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface-variant">SYNCED // CLOUD</span></div><div class="flex items-center gap-space-xs bg-surface-container-lowest/80 p-space-xs rounded-xl"><button class="p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors flex items-center justify-center" title="Change Wallpaper" type="button"><span class="material-symbols-outlined text-[18px]">wallpaper</span></button><button class="p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors flex items-center justify-center" title="Toggle Density" type="button"><span class="material-symbols-outlined text-[18px]">grid_view</span></button><button class="p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors flex items-center justify-center" title="Toggle Mode" type="button"><span class="material-symbols-outlined text-[18px]">dark_mode</span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm cursor-pointer"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] flex flex-col justify-between"><div class="flex flex-col w-full">
+<!-- AMBIENT ILLUMINATION BACKDROP -->
+<div class="relative w-full max-w-[1280px] mx-auto px-margin pb-space-xl flex flex-col items-center">
+<!-- Ambient Radial Lighting -->
+<div class="absolute top-12 left-1/2 -translate-x-1/2 w-[720px] h-[340px] bg-gradient-to-b from-primary/10 via-secondary/5 to-transparent rounded-full blur-3xl pointer-events-none -z-10"></div>
+<!-- 1. HERO CLOCK & ATMOSPHERIC WIDGET CLUSTER -->
+<section class="w-full flex flex-col items-center justify-center pt-space-lg pb-space-md text-center">
+<!-- Status Badge & Weather Pill -->
+<div class="flex items-center gap-space-sm mb-space-sm">
+<div class="inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-high/90 backdrop-blur-md shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[16px]">wb_sunny</span>
+<span class="font-label-md text-label-md text-on-surface">São Paulo, 24°C</span>
+<span class="font-label-sm text-label-sm text-outline">• Ensolarado</span>
+</div>
+<div class="hidden sm:inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-high/90 backdrop-blur-md shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-md text-label-md text-on-surface-variant">IBOVESPA +0.84%</span>
+</div>
+</div>
+<!-- Live Digital Display Clock -->
+<div class="flex items-baseline justify-center tracking-tighter select-none font-display-clock text-display-clock text-on-surface">
+<span id="live-hours">14</span>
+<span class="text-primary/70 animate-pulse px-0.5">:</span>
+<span id="live-minutes">28</span>
+<span class="font-label-lg text-label-lg text-primary ml-space-xs tracking-normal font-normal self-end pb-4" id="live-seconds">45</span>
+</div>
+<!-- Greeting & Live Localized Date -->
+<div class="flex flex-col sm:flex-row items-center gap-space-xs mt-1 text-on-surface-variant">
+<span class="font-headline-sm text-headline-sm text-on-surface font-medium" id="live-greeting">Boa tarde, Alex</span>
+<span class="hidden sm:inline text-outline-variant font-label-md text-label-md">|</span>
+<span class="font-label-md text-label-md text-on-surface-variant tracking-wide uppercase" id="live-date">Quinta-feira, 24 de Outubro de 2024</span>
+</div>
+</section>
+<!-- 2. CENTRAL SEARCH BAR (OMNIBOX) -->
+<section class="w-full max-w-[760px] relative my-space-md z-30">
+<div class="relative flex items-center bg-surface-container-high/80 hover:bg-surface-container-highest/90 focus-within:bg-surface-container-highest backdrop-blur-2xl rounded-2xl shadow-xl transition-all duration-200">
+<!-- Engine Selector Trigger -->
+<div class="relative">
+<button class="flex items-center gap-space-xs pl-space-md pr-space-sm py-space-md rounded-l-2xl text-on-surface hover:bg-surface-bright/50 transition-colors" id="engine-btn" type="button">
+<span class="w-6 h-6 rounded-lg bg-surface-container-lowest flex items-center justify-center font-label-sm text-label-sm font-bold text-primary" id="engine-icon">G</span>
+<span class="font-label-md text-label-md text-on-surface hidden sm:inline" id="engine-label">Google</span>
+<span class="material-symbols-outlined text-outline text-[18px]">expand_more</span>
+</button>
+<!-- Engine Dropdown Flyout -->
+<div class="hidden absolute left-0 top-full mt-2 w-48 bg-surface-container-highest/95 backdrop-blur-2xl rounded-xl shadow-2xl p-space-xs z-50" id="engine-menu">
+<button class="w-full flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-left text-on-surface hover:bg-surface-bright transition-colors font-body-sm text-body-sm" onclick="selectEngine('Google', 'G', 'https://www.google.com/search?q=')" type="button">
+<span class="w-5 h-5 rounded bg-surface-container-lowest flex items-center justify-center font-label-sm text-label-sm text-primary font-bold">G</span>
+<span>Google</span>
+</button>
+<button class="w-full flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-left text-on-surface hover:bg-surface-bright transition-colors font-body-sm text-body-sm" onclick="selectEngine('DuckDuckGo', 'D', 'https://duckduckgo.com/?q=')" type="button">
+<span class="w-5 h-5 rounded bg-secondary/20 text-secondary flex items-center justify-center font-label-sm text-label-sm font-bold">D</span>
+<span>DuckDuckGo</span>
+</button>
+<button class="w-full flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-left text-on-surface hover:bg-surface-bright transition-colors font-body-sm text-body-sm" onclick="selectEngine('Bing', 'B', 'https://www.bing.com/search?q=')" type="button">
+<span class="w-5 h-5 rounded bg-tertiary/20 text-tertiary flex items-center justify-center font-label-sm text-label-sm font-bold">B</span>
+<span>Bing</span>
+</button>
+<button class="w-full flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-left text-on-surface hover:bg-surface-bright transition-colors font-body-sm text-body-sm" onclick="selectEngine('YouTube', 'Y', 'https://www.youtube.com/results?search_query=')" type="button">
+<span class="w-5 h-5 rounded bg-error-container text-error flex items-center justify-center font-label-sm text-label-sm font-bold">Y</span>
+<span>YouTube</span>
+</button>
+</div>
+</div>
+<!-- Search Input -->
+<form class="flex-1 flex items-center min-w-0" id="search-form" onsubmit="executeSearch(event)">
+<input autocomplete="off" class="w-full bg-transparent px-space-sm py-space-md text-body-lg font-body-lg text-on-surface placeholder:text-outline focus:outline-none" id="search-input" placeholder="Pesquise na web ou digite uma URL..." type="text"/>
+</form>
+<!-- Right Quick Controls -->
+<div class="flex items-center gap-space-xs pr-space-md">
+<button class="p-1.5 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright/40 transition-colors" onclick="clearSearch()" title="Limpar pesquisa" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+<div class="hidden sm:flex items-center px-2 py-0.5 rounded-md bg-surface-container-lowest text-outline font-label-sm text-label-sm select-none">
+            /
+          </div>
+<button class="p-2 rounded-xl bg-primary text-on-primary hover:bg-primary-container transition-all flex items-center justify-center shadow-sm" onclick="document.getElementById('search-form').dispatchEvent(new Event('submit'))" type="button">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 3. BOOKMARKS / FAVORITOS SECTION -->
+<section class="w-full mt-space-lg">
+<!-- Section Toolbar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md mb-space-lg">
+<div class="flex items-baseline gap-space-sm">
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Meus Favoritos</h2>
+<span class="font-label-sm text-label-sm text-outline px-space-sm py-0.5 rounded-full bg-surface-container-high">12 SITES</span>
+</div>
+<div class="flex items-center gap-space-md flex-wrap justify-between sm:justify-end">
+<!-- Category Tabs -->
+<div class="inline-flex p-1 bg-surface-container-low rounded-xl">
+<button class="px-space-md py-1 rounded-lg font-body-sm text-body-sm bg-surface-container-high text-on-surface font-medium transition-colors" type="button">Todos</button>
+<button class="px-space-md py-1 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Trabalho</button>
+<button class="px-space-md py-1 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Finanças</button>
+<button class="px-space-md py-1 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Dev &amp; Tech</button>
+<button class="px-space-md py-1 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Lazer</button>
+</div>
+<!-- Add Button -->
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-xl bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:bg-primary-container transition-transform active:scale-95 shadow-md" onclick="openModal('add')" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Novo Favorito</span>
+</button>
+</div>
+</div>
+<!-- Bookmark Cards Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-gutter">
+<!-- Pre-Configured Featured: CalculaBolsa -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-tertiary/15 text-tertiary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined text-[24px]">query_stats</span>
+</div>
+<div class="relative">
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" onclick="toggleCardMenu(event, 'menu-calc')" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+<div class="hidden absolute right-0 top-full mt-1 w-32 bg-surface-container-highest/95 backdrop-blur-xl rounded-xl shadow-xl p-1 z-20" id="menu-calc">
+<button class="w-full text-left px-2 py-1.5 rounded text-on-surface hover:bg-surface-bright font-body-sm text-body-sm flex items-center gap-2" onclick="openModal('edit', 'CalculaBolsa', 'https://calculabolsa.com', 'Finanças')" type="button">
+<span class="material-symbols-outlined text-[14px]">edit</span> Editar
+                </button>
+<button class="w-full text-left px-2 py-1.5 rounded text-error hover:bg-error-container/30 font-body-sm text-body-sm flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span> Remover
+                </button>
+</div>
+</div>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://calculabolsa.com" rel="noopener noreferrer" target="_blank">
+<div>
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">CalculaBolsa</span>
+<span class="w-2 h-2 rounded-full bg-tertiary shrink-0"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">Calculadora e controle de investimentos e DARF</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-secondary truncate">calculabolsa.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary">Finanças</span>
+</div>
+</a>
+</div>
+<!-- GitHub -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest text-on-surface flex items-center justify-center">
+<svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://github.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">GitHub</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Repositórios &amp; Pull Requests</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">github.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">Dev &amp; Tech</span>
+</div>
+</a>
+</div>
+<!-- ChatGPT -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">smart_toy</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://chatgpt.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">ChatGPT</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Assistente de Inteligência Artificial</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">chatgpt.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary">Produtividade</span>
+</div>
+</a>
+</div>
+<!-- Figma -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">design_services</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://figma.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">Figma</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Workspaces &amp; Protótipos UI</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">figma.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">Design</span>
+</div>
+</a>
+</div>
+<!-- YouTube -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-error-container/40 text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">play_circle</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://youtube.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">YouTube</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Vídeos, Tutoriais &amp; Música</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">youtube.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-error">Lazer</span>
+</div>
+</a>
+</div>
+<!-- Notion -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest text-on-surface flex items-center justify-center font-bold">
+<span class="font-label-lg text-label-lg">N</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://notion.so" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">Notion</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Documentos &amp; Roadmaps</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">notion.so</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">Trabalho</span>
+</div>
+</a>
+</div>
+<!-- Gmail -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-error-container/20 text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">mail</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://mail.google.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">Gmail</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Caixa de Entrada &amp; Alertas</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">gmail.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">Comunicação</span>
+</div>
+</a>
+</div>
+<!-- Vercel -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest text-on-surface flex items-center justify-center">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z"></path></svg>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://vercel.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">Vercel</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Deployments &amp; Serverless</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">vercel.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">Dev &amp; Tech</span>
+</div>
+</a>
+</div>
+<!-- Spotify -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">graphic_eq</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://spotify.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">Spotify</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Playlists &amp; Foco Diário</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">spotify.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary">Lazer</span>
+</div>
+</a>
+</div>
+<!-- LinkedIn -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-secondary-container/20 text-secondary flex items-center justify-center font-bold">
+<span class="font-label-lg text-label-lg">in</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://linkedin.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">LinkedIn</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Feed profissional &amp; Vagas</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">linkedin.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary">Carreira</span>
+</div>
+</a>
+</div>
+<!-- Twitter / X -->
+<div class="group relative flex flex-col p-space-md rounded-2xl bg-surface-container-low/90 hover:bg-surface-container/90 transition-all duration-200 shadow-sm hover:shadow-xl hover:-translate-y-1">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest text-on-surface flex items-center justify-center font-black">
+              𝕏
+            </div>
+<button class="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-outline-variant hover:text-on-surface hover:bg-surface-bright transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<a class="flex-1 flex flex-col justify-between" href="https://x.com" rel="noopener noreferrer" target="_blank">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold block">X (Twitter)</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Notícias &amp; Tendências Tech</p>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline truncate">x.com</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface">Rede</span>
+</div>
+</a>
+</div>
+<!-- Add New Bookmark Tile Placeholder -->
+<button class="flex flex-col items-center justify-center p-space-md rounded-2xl bg-surface-container-lowest/40 hover:bg-surface-container-low transition-all duration-200 group text-center min-h-[140px] shadow-sm hover:shadow-lg" onclick="openModal('add')" type="button">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-high group-hover:bg-primary/20 text-outline-variant group-hover:text-primary flex items-center justify-center mb-space-sm transition-all">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary font-medium transition-colors">Adicionar website</span>
+<span class="font-label-sm text-label-sm text-outline-variant mt-0.5">Novo atalho rápido</span>
+</button>
+</div>
+</section>
+<!-- 4. QUICK UTILITIES / BOTTOM DOCK -->
+<section class="w-full mt-space-xl pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<!-- Quick Tools Dock -->
+<div class="flex items-center gap-space-xs p-1.5 rounded-2xl bg-surface-container-low/80 backdrop-blur-xl shadow-lg">
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-body-sm text-body-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Downloads</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-body-sm text-body-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Histórico</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-body-sm text-body-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">extension</span>
+<span>Extensões</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-body-sm text-body-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Notas Rápidas</span>
+</button>
+</div>
+<!-- Live Workspace Status Pill -->
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-xl bg-surface-container-low/60">
+<span class="material-symbols-outlined text-[16px] text-tertiary">memory</span>
+<span class="font-label-sm text-label-sm">RAM: 4.2 / 16 GB</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-xl bg-surface-container-low/60">
+<span class="material-symbols-outlined text-[16px] text-secondary">wifi</span>
+<span class="font-label-sm text-label-sm">520 MBPS</span>
+</div>
+</div>
+</section>
+</div>
+<!-- 5. INTERACTIVE MODAL: ADICIONAR / EDITAR FAVORITO -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-surface-container-lowest/80 backdrop-blur-md" id="bookmark-modal">
+<div class="relative w-full max-w-[480px] bg-surface-container-high/95 backdrop-blur-2xl rounded-3xl p-space-lg shadow-2xl transition-all">
+<!-- Modal Header -->
+<div class="flex items-center justify-between pb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" id="modal-icon-badge">bookmark</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold" id="modal-title">Editar Favorito</h3>
+</div>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-bright transition-colors" onclick="closeModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Form Body -->
+<form class="space-y-space-md mt-space-xs" id="bookmark-form" onsubmit="saveBookmark(event)">
+<!-- Campo: Nome do Favorito -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-space-xs" for="bookmark-name">Nome do Favorito</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest/90 px-space-md py-2.5 rounded-xl text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest" id="bookmark-name" placeholder="Ex: CalculaBolsa, GitHub..." required="" type="text" value="CalculaBolsa"/>
+</div>
+</div>
+<!-- Campo: URL do Website -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-space-xs" for="bookmark-url">URL do Website</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest/90 px-space-md py-2.5 rounded-xl text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest" id="bookmark-url" oninput="updateFaviconPreview(this.value)" placeholder="https://exemplo.com" required="" type="url" value="https://calculabolsa.com"/>
+</div>
+</div>
+<!-- Campo: Categoria Dropdown -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-space-xs" for="bookmark-category">Categoria</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest/90 px-space-md py-2.5 rounded-xl text-body-md font-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest cursor-pointer" id="bookmark-category">
+<option selected="" value="Finanças">Finanças &amp; Investimentos</option>
+<option value="Dev &amp; Tech">Dev &amp; Tecnologia</option>
+<option value="Trabalho">Trabalho &amp; Gestão</option>
+<option value="Lazer">Lazer &amp; Mídia</option>
+<option value="Geral">Outros</option>
+</select>
+<span class="material-symbols-outlined absolute right-space-md top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[20px]">unfold_more</span>
+</div>
+</div>
+<!-- Detecção de Ícone Automática -->
+<div class="p-space-md rounded-2xl bg-surface-container-lowest/70 flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-tertiary/20 text-tertiary flex items-center justify-center font-bold" id="favicon-preview">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm font-medium text-on-surface">Detecção Automática</p>
+<p class="font-label-sm text-label-sm text-outline">Favicon sincronizado via Google API</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded bg-tertiary-container/30 text-tertiary font-semibold">ATIVO</span>
+</div>
+<!-- Modal Actions Footer -->
+<div class="flex items-center justify-between pt-space-md gap-space-sm">
+<button class="px-space-md py-2.5 rounded-xl bg-error-container/40 text-error hover:bg-error-container/70 font-body-sm text-body-sm font-medium transition-colors flex items-center gap-1.5" id="modal-delete-btn" onclick="deleteBookmark()" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+<span>Excluir</span>
+</button>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2.5 rounded-xl bg-surface-container text-on-surface hover:bg-surface-bright font-body-sm text-body-sm font-medium transition-colors" onclick="closeModal()" type="button">
+              Cancelar
+            </button>
+<button class="px-space-lg py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-body-sm text-body-sm font-semibold transition-transform active:scale-95 shadow-md" type="submit">
+              Salvar Alterações
+            </button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+<script>
+  // 1. Live Digital Clock & Greeting Update in pt-BR
+  function updateLiveClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    const hElem = document.getElementById('live-hours');
+    const mElem = document.getElementById('live-minutes');
+    const sElem = document.getElementById('live-seconds');
+    if (hElem) hElem.textContent = hours;
+    if (mElem) mElem.textContent = minutes;
+    if (sElem) sElem.textContent = seconds;
+
+    // Greeting logic
+    const hourNum = now.getHours();
+    let greeting = 'Boa noite, Alex';
+    if (hourNum >= 5 && hourNum < 12) {
+      greeting = 'Bom dia, Alex';
+    } else if (hourNum >= 12 && hourNum < 18) {
+      greeting = 'Boa tarde, Alex';
+    }
+    const gElem = document.getElementById('live-greeting');
+    if (gElem) gElem.textContent = greeting;
+
+    // Localized Date in Portuguese
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const dateStr = now.toLocaleDateString('pt-BR', options);
+    const dElem = document.getElementById('live-date');
+    if (dElem && dateStr) {
+      dElem.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    }
+  }
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
+
+  // 2. Search Engine Switcher Logic
+  let currentEngineBase = 'https://www.google.com/search?q=';
+  const engineBtn = document.getElementById('engine-btn');
+  const engineMenu = document.getElementById('engine-menu');
+
+  if (engineBtn && engineMenu) {
+    engineBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      engineMenu.classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => {
+      engineMenu.classList.add('hidden');
+    });
+  }
+
+  function selectEngine(name, iconChar, baseUrl) {
+    currentEngineBase = baseUrl;
+    const label = document.getElementById('engine-label');
+    const icon = document.getElementById('engine-icon');
+    if (label) label.textContent = name;
+    if (icon) icon.textContent = iconChar;
+    if (engineMenu) engineMenu.classList.add('hidden');
+  }
+
+  function executeSearch(e) {
+    e.preventDefault();
+    const queryInput = document.getElementById('search-input');
+    if (!queryInput) return;
+    const query = queryInput.value.trim();
+    if (!query) return;
+
+    if (query.startsWith('http://') || query.startsWith('https://')) {
+      window.open(query, '_blank');
+    } else if (query.includes('.') && !query.includes(' ')) {
+      window.open('https://' + query, '_blank');
+    } else {
+      window.open(currentEngineBase + encodeURIComponent(query), '_blank');
+    }
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('search-input');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  // Hotkey '/' to focus search omnibox
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      const sInput = document.getElementById('search-input');
+      if (sInput) sInput.focus();
+    }
+  });
+
+  // 3. Card Context Dropdown
+  function toggleCardMenu(e, menuId) {
+    e.stopPropagation();
+    const menu = document.getElementById(menuId);
+    if (menu) {
+      menu.classList.toggle('hidden');
+    }
+  }
+  document.addEventListener('click', () => {
+    const calcMenu = document.getElementById('menu-calc');
+    if (calcMenu) calcMenu.classList.add('hidden');
+  });
+
+  // 4. Modal Interactions (Add / Edit Favorite)
+  const modal = document.getElementById('bookmark-modal');
+
+  function openModal(mode, name = '', url = '', cat = 'Finanças') {
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    const titleElem = document.getElementById('modal-title');
+    const nameElem = document.getElementById('bookmark-name');
+    const urlElem = document.getElementById('bookmark-url');
+    const catElem = document.getElementById('bookmark-category');
+    const delBtn = document.getElementById('modal-delete-btn');
+
+    if (mode === 'add') {
+      if (titleElem) titleElem.textContent = 'Adicionar Favorito';
+      if (nameElem) nameElem.value = '';
+      if (urlElem) urlElem.value = 'https://';
+      if (catElem) catElem.value = 'Geral';
+      if (delBtn) delBtn.classList.add('hidden');
+    } else {
+      if (titleElem) titleElem.textContent = 'Editar Favorito';
+      if (nameElem) nameElem.value = name || 'CalculaBolsa';
+      if (urlElem) urlElem.value = url || 'https://calculabolsa.com';
+      if (catElem) catElem.value = cat || 'Finanças';
+      if (delBtn) delBtn.classList.remove('hidden');
+    }
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function updateFaviconPreview(url) {
+    const preview = document.getElementById('favicon-preview');
+    if (!preview) return;
+    try {
+      const parsed = new URL(url);
+      preview.innerHTML = `<span class="material-symbols-outlined text-[20px]">public</span>`;
+    } catch {
+      // Keep existing
+    }
+  }
+
+  function saveBookmark(e) {
+    e.preventDefault();
+    closeModal();
+  }
+
+  function deleteBookmark() {
+    closeModal();
+  }
+</script></main><footer class="w-full bg-surface-container-lowest/80 backdrop-blur-md"><div class="max-w-[1280px] mx-auto px-margin py-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant"><div class="flex items-center gap-space-md font-label-sm text-label-sm"><span>LATENCY: 14MS</span><span>•</span><span>SYS_STATUS: OPTIMAL</span><span>•</span><span>NOVA ENGINE v4.2</span></div><div class="font-body-sm text-body-sm text-on-surface-variant">© NovaTab Operational Surface. High-Focus Canvas.</div></div></footer></body></html>
