@@ -1,11 +1,21 @@
 const STORAGE_KEY = 'localdashboard:favorites';
 const CATEGORIES_KEY = 'localdashboard:categories';
 const SERVICE_KEY = 'localdashboard:faviconService';
+const BACKGROUND_KEY = 'localdashboard:background';
 
 const DEFAULTS = [
   { name: 'Google', url: 'https://www.google.com', icon: '', category: 'Geral' },
   { name: 'YouTube', url: 'https://www.youtube.com', icon: '', category: 'Lazer' },
   { name: 'GitHub', url: 'https://github.com', icon: '', category: 'Dev & Tech' },
+];
+
+const BG_PRESETS = [
+  { name: 'Montanhas', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80' },
+  { name: 'Oceanos', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&q=80' },
+  { name: 'Floresta', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80' },
+  { name: 'Estrelas', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=80' },
+  { name: 'Aurora', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1600&q=80' },
+  { name: 'Deserto', url: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1600&q=80' },
 ];
 
 const TILE_COLORS = [
@@ -48,6 +58,15 @@ const cancelBtn = document.getElementById('f-cancel');
 const searchForm = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
 const addFavBtn = document.getElementById('add-fav-btn');
+const bgBtn = document.getElementById('bg-btn');
+const bgModal = document.getElementById('bg-modal');
+const bgForm = document.getElementById('bg-form');
+const bgInput = document.getElementById('bg-url');
+const bgPresets = document.getElementById('bg-presets');
+const bgClose = document.getElementById('bg-close');
+const bgCancel = document.getElementById('bg-cancel');
+const bgClear = document.getElementById('bg-clear');
+const bgImage = document.getElementById('bg-image');
 
 /* ---------- helpers ---------- */
 
@@ -556,6 +575,97 @@ function updateFaviconPreview() {
 inputUrl.addEventListener('input', updateFaviconPreview);
 inputService.addEventListener('input', updateFaviconPreview);
 
+/* ---------- plano de fundo ---------- */
+
+function loadBackground() {
+  let src = '';
+  try {
+    src = localStorage.getItem(BACKGROUND_KEY) || '';
+  } catch {
+    /* modo privado etc. */
+  }
+  applyBackground(src, false);
+  bgInput.value = src;
+}
+
+function applyBackground(src, persist = true) {
+  if (src) {
+    bgImage.style.backgroundImage = `url("${src}")`;
+    bgImage.parentElement.classList.add('visible');
+  } else {
+    bgImage.style.backgroundImage = 'none';
+    bgImage.parentElement.classList.remove('visible');
+  }
+  if (persist) {
+    try {
+      localStorage.setItem(BACKGROUND_KEY, src);
+    } catch {
+      /* modo privado etc. */
+    }
+  }
+  markSelectedPreset();
+}
+
+function renderBgPresets() {
+  bgPresets.replaceChildren();
+  BG_PRESETS.forEach((preset) => {
+    const btn = el('button', 'preset-thumb');
+    btn.type = 'button';
+    btn.title = preset.name;
+    btn.style.backgroundImage = `url("${preset.url}")`;
+
+    const label = el('span', 'preset-name');
+    label.textContent = preset.name;
+    btn.appendChild(label);
+
+    btn.addEventListener('click', () => {
+      bgInput.value = preset.url;
+      applyBackground(preset.url, false);
+      markSelectedPreset();
+    });
+
+    bgPresets.appendChild(btn);
+  });
+  markSelectedPreset();
+}
+
+function markSelectedPreset() {
+  const current = bgInput.value.trim();
+  bgPresets.querySelectorAll('.preset-thumb').forEach((btn) => {
+    btn.classList.toggle('selected', btn.style.backgroundImage.includes(current));
+  });
+}
+
+bgBtn.addEventListener('click', () => {
+  bgModal.hidden = false;
+  setTimeout(() => bgInput.focus(), 50);
+});
+
+bgClose.addEventListener('click', () => {
+  bgModal.hidden = true;
+});
+bgCancel.addEventListener('click', () => {
+  bgModal.hidden = true;
+});
+
+bgModal.addEventListener('click', (e) => {
+  if (e.target === bgModal) bgModal.hidden = true;
+});
+
+bgInput.addEventListener('input', () => applyBackground(bgInput.value.trim(), false));
+
+bgClear.addEventListener('click', () => {
+  bgInput.value = '';
+  applyBackground('', false);
+  markSelectedPreset();
+});
+
+bgForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  applyBackground(bgInput.value.trim(), true);
+  bgModal.hidden = true;
+});
+
 /* ---------- gerenciar categorias ---------- */
 
 function renderCatList() {
@@ -705,5 +815,7 @@ loadCategories();
 normalizeCategories();
 if (!cats.includes(activeCategory)) activeCategory = 'Geral';
 renderAll();
+loadBackground();
+renderBgPresets();
 tick();
 setInterval(tick, 1000);

@@ -83,6 +83,73 @@ body {
    START PAGE
    ============================================================ */
 
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bg-layer.visible {
+  opacity: 1;
+}
+
+.bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 19, 29, 0.45) 0%,
+    rgba(15, 19, 29, 0.72) 100%
+  );
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.bg-btn {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.bg-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.bg-btn:active {
+  transform: scale(0.94);
+}
+
+.bg-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
 .startpage {
   position: relative;
   min-height: 100vh;
@@ -721,6 +788,46 @@ body {
   gap: 10px;
 }
 
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.preset-thumb {
+  position: relative;
+  height: 64px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.preset-thumb:hover {
+  transform: scale(1.03);
+  border-color: var(--cyan);
+}
+
+.preset-thumb.selected {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px var(--cyan);
+}
+
+.preset-name {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 4px 6px;
+  font-size: 10px;
+  line-height: 12px;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+}
+
 .url-row input {
   flex: 1;
   min-width: 0;
@@ -877,6 +984,13 @@ body {
    ============================================================ */
 
 @media (max-width: 639px) {
+  .bg-btn {
+    top: 12px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+  }
+
   .clock,
   .clock-colon {
     font-size: 56px;

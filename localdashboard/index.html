@@ -12,7 +12,16 @@
 </head>
 <body>
 
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-image" id="bg-image"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
   <main class="startpage">
+    <button class="bg-btn" id="bg-btn" type="button" title="Plano de fundo">
+      <span class="material-symbols-outlined">image</span>
+    </button>
+
     <div class="cast">
 
       <section class="hero">
@@ -103,6 +112,37 @@
           <div class="flex-spacer"></div>
           <button class="btn-ghost" id="f-cancel" type="button">Cancelar</button>
           <button class="btn-primary" type="submit">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL PLANO DE FUNDO -->
+  <div class="overlay" id="bg-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Plano de fundo</h3>
+        <button class="icon-btn" id="bg-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="modal-form" id="bg-form">
+        <div class="field">
+          <label for="bg-url">Imagem (URL)</label>
+          <input id="bg-url" type="url" placeholder="https://exemplo.com/imagem.jpg">
+        </div>
+
+        <div class="field">
+          <label>Escolher da galeria</label>
+          <div class="preset-grid" id="bg-presets"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-ghost" id="bg-clear" type="button">Remover</button>
+          <div class="flex-spacer"></div>
+          <button class="btn-ghost" id="bg-cancel" type="button">Cancelar</button>
+          <button class="btn-primary" type="submit">Aplicar</button>
         </div>
       </form>
     </div>
