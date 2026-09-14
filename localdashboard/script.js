@@ -93,6 +93,11 @@ const newsList = document.getElementById('news-list');
 const newsRefresh = document.getElementById('news-refresh');
 const favShelf = document.querySelector('.fav-shelf');
 const resizeHandle = document.getElementById('resize-handle');
+const settingsBtn = document.getElementById('settings-btn');
+const settingsMenu = document.getElementById('settings-menu');
+const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importFile = document.getElementById('import-file');
 
 /* ---------- helpers ---------- */
 
@@ -571,6 +576,7 @@ function closeAllMenus() {
   document.querySelectorAll('.fav-menu').forEach((m) => {
     m.hidden = true;
   });
+  settingsMenu.hidden = true;
 }
 
 function clearDragTargets() {
@@ -1322,6 +1328,155 @@ confirmModal.addEventListener('click', (e) => {
   if (e.target === confirmModal) confirmModal.hidden = true;
 });
 
+/* ---------- exportar e importar configurações ---------- */
+
+function storageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function buildExportPayload() {
+  let feed = {};
+  try {
+    feed = JSON.parse(storageGet(FEED_KEY) || '{}');
+  } catch {
+    feed = {};
+  }
+  return {
+    app: 'localdashboard',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    favorites,
+    categories: cats,
+    faviconService,
+    background: storageGet(BACKGROUND_KEY) || '',
+    feed,
+    shelfWidth: parseInt(storageGet(SHELF_WIDTH_KEY) || '', 10) || null,
+  };
+}
+
+function exportSettings() {
+  const blob = new Blob([JSON.stringify(buildExportPayload(), null, 2)], {
+    type: 'application/json',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dashboard-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function cleanImportedFavorite(f) {
+  return {
+    name: String(f.name || f.url || '').trim(),
+    url: f.url || '',
+    icon: f.icon || '',
+    category: (f.category || 'Geral').trim() || 'Geral',
+  };
+}
+
+function applyImportedCategories(list) {
+  cats = list
+    .map((c) => String(c).trim())
+    .filter((c) => c && c !== 'undefined')
+    .filter((c, i, a) => a.indexOf(c) === i);
+  if (!cats.length) cats = ['Geral'];
+  if (!cats.includes('Geral')) cats.unshift('Geral');
+  saveCategories();
+  normalizeCategories();
+}
+
+function importSettings(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || data.app !== 'localdashboard') {
+        throw new Error('Arquivo de dashboard inválido.');
+      }
+      if (!Array.isArray(data.favorites)) {
+        throw new Error('O arquivo não contém a lista de favoritos.');
+      }
+
+      favorites = data.favorites.map(cleanImportedFavorite);
+      save();
+
+      if (Array.isArray(data.categories)) {
+        applyImportedCategories(data.categories);
+      } else {
+        normalizeCategories();
+      }
+
+      if (typeof data.faviconService === 'string' && data.faviconService.trim()) {
+        faviconService = data.faviconService.trim();
+        savedService = faviconService;
+        localStorage.setItem(SERVICE_KEY, faviconService);
+      }
+
+      if (typeof data.background === 'string' && data.background) {
+        localStorage.setItem(BACKGROUND_KEY, data.background);
+      }
+      bgInput.value = storageGet(BACKGROUND_KEY) || '';
+      applyBackground(bgInput.value, false);
+
+      if (data.feed && typeof data.feed === 'object') {
+        localStorage.setItem(
+          FEED_KEY,
+          JSON.stringify({
+            url: data.feed.url || '',
+            count: parseInt(data.feed.count, 10) || 5,
+          })
+        );
+      }
+      loadFeedConfig();
+      if (feedConfig.url) {
+        refreshNews();
+      } else {
+        newsZone.hidden = true;
+      }
+
+      if (typeof data.shelfWidth === 'number' && data.shelfWidth) {
+        localStorage.setItem(SHELF_WIDTH_KEY, String(data.shelfWidth));
+      }
+      loadShelfWidth();
+
+      if (!cats.includes(activeCategory)) activeCategory = 'Geral';
+      renderAll();
+    } catch (err) {
+      alert('Falha ao importar: ' + (err.message || 'arquivo inválido'));
+    } finally {
+      importFile.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+settingsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  settingsMenu.hidden = !settingsMenu.hidden;
+});
+
+exportBtn.addEventListener('click', () => {
+  settingsMenu.hidden = true;
+  exportSettings();
+});
+
+importBtn.addEventListener('click', () => {
+  settingsMenu.hidden = true;
+  importFile.click();
+});
+
+importFile.addEventListener('change', () => {
+  importSettings(importFile.files[0]);
+});
+
 /* ---------- busca ---------- */
 
 searchForm.addEventListener('submit', (e) => {
@@ -1351,6 +1506,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeModal();
     closeCatModal();
+    settingsMenu.hidden = true;
     confirmModal.hidden = true;
     manageModal.hidden = true;
     feedModal.hidden = true;

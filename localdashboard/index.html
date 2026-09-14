@@ -19,6 +19,21 @@
 
   <main class="startpage">
     <div class="corner-btns">
+      <div class="corner-group">
+        <button class="bg-btn" id="settings-btn" type="button" title="Configurações">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div class="settings-menu" id="settings-menu" hidden>
+          <button class="settings-item" id="export-btn" type="button">
+            <span class="material-symbols-outlined">download</span>
+            <span>Exportar configurações</span>
+          </button>
+          <button class="settings-item" id="import-btn" type="button">
+            <span class="material-symbols-outlined">upload</span>
+            <span>Importar configurações</span>
+          </button>
+        </div>
+      </div>
       <button class="bg-btn" id="feed-btn" type="button" title="Feed de notícias">
         <span class="material-symbols-outlined">rss_feed</span>
       </button>
@@ -26,6 +41,8 @@
         <span class="material-symbols-outlined">image</span>
       </button>
     </div>
+
+    <input type="file" id="import-file" accept=".json,application/json" hidden>
 
     <div class="cast">
 
