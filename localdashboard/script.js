@@ -729,10 +729,17 @@ inputService.addEventListener('input', updateFaviconPreview);
 
 function loadBackground() {
   let src = '';
+  let firstTime = true;
   try {
-    src = localStorage.getItem(BACKGROUND_KEY) || '';
+    const saved = localStorage.getItem(BACKGROUND_KEY);
+    firstTime = saved === null;
+    src = saved || '';
   } catch {
     /* modo privado etc. */
+  }
+  if (firstTime && !src) {
+    const oceanos = BG_PRESETS.find((p) => p.name === 'Oceanos');
+    src = oceanos ? oceanos.url : '';
   }
   applyBackground(src, false);
   bgInput.value = src;
