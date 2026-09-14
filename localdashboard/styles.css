@@ -474,10 +474,26 @@ body {
 
 /* ---------- NEWS FEED ---------- */
 
-.news-zone {
+.news-grid {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
   width: 100%;
   max-width: 760px;
   margin-bottom: 20px;
+}
+
+.resize-handle.news-resize,
+.resize-handle.news-resize.active {
+  right: 50%;
+  bottom: -12px;
+  transform: translateX(50%);
+}
+
+.news-zone {
+  flex: 1;
+  min-width: 0;
   padding: 14px 18px;
   border-radius: 20px;
   background: rgba(28, 31, 42, 0.32);
@@ -995,6 +1011,33 @@ body {
   color: rgba(255, 255, 255, 0.4);
 }
 
+.feed-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.feed-row .field:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feed-block + .feed-block {
+  padding-top: 16px;
+  border-top: 1px solid rgba(70, 69, 84, 0.3);
+}
+
+.feed-count-field {
+  flex-shrink: 0;
+  width: 96px;
+}
+
 .url-row {
   display: flex;
   align-items: stretch;
@@ -1209,10 +1252,25 @@ body {
    RESPONSIVO
    ============================================================ */
 
+@media (max-width: 720px) {
+  .news-grid {
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 639px) {
   .corner-btns {
     top: 12px;
     right: 14px;
+  }
+
+  .feed-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .feed-count-field {
+    width: 100%;
   }
 
   .bg-btn {

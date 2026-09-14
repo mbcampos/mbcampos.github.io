@@ -84,13 +84,18 @@ const feedBtn = document.getElementById('feed-btn');
 const feedModal = document.getElementById('feed-modal');
 const feedForm = document.getElementById('feed-form');
 const feedUrlInput = document.getElementById('feed-url');
+const feedUrlInput2 = document.getElementById('feed-url-2');
+const feedTitleInput = document.getElementById('feed-title');
+const feedTitleInput2 = document.getElementById('feed-title-2');
 const feedCountInput = document.getElementById('feed-count');
+const feedCountInput2 = document.getElementById('feed-count-2');
 const feedClose = document.getElementById('feed-close');
 const feedCancel = document.getElementById('feed-cancel');
 const feedClear = document.getElementById('feed-clear');
-const newsZone = document.getElementById('news-zone');
-const newsList = document.getElementById('news-list');
-const newsRefresh = document.getElementById('news-refresh');
+const newsZones = [document.getElementById('news-zone'), document.getElementById('news-zone-2')];
+const newsLists = [document.getElementById('news-list'), document.getElementById('news-list-2')];
+const newsRefreshes = [document.getElementById('news-refresh'), document.getElementById('news-refresh-2')];
+const newsTitles = [document.getElementById('news-title'), document.getElementById('news-title-2')];
 const favShelf = document.querySelector('.fav-shelf');
 const resizeHandle = document.getElementById('resize-handle');
 const settingsBtn = document.getElementById('settings-btn');
@@ -870,75 +875,128 @@ function applyShelfWidth(w) {
   return width;
 }
 
-function loadShelfWidth() {
-  try {
-    const w = parseInt(localStorage.getItem(SHELF_WIDTH_KEY), 10);
-    if (w && w >= SHELF_MIN_W && w <= shelfMaxWidth()) applyShelfWidth(w);
-  } catch {
-    /* modo privado etc. */
-  }
-}
-
-window.addEventListener('resize', () => {
-  const w = parseInt(localStorage.getItem(SHELF_WIDTH_KEY), 10);
-  if (w) applyShelfWidth(Math.min(w, shelfMaxWidth()));
-});
-
-resizeHandle.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  resizeHandle.setPointerCapture(e.pointerId);
-  resizeHandle.classList.add('active');
-
-  const startX = e.clientX;
-  const startW = favShelf.getBoundingClientRect().width;
-
-  const move = (ev) => applyShelfWidth(startW + (ev.clientX - startX));
-  const up = (ev) => {
-    resizeHandle.classList.remove('active');
-    resizeHandle.removeEventListener('pointermove', move);
-    resizeHandle.removeEventListener('pointerup', up);
-    resizeHandle.removeEventListener('pointercancel', up);
+function attachWidthResize(handle, element, key, minW, onChange) {
+  const clamp = (w) => Math.max(minW, Math.min(shelfMaxWidth(), Math.round(w)));
+  const load = () => {
     try {
-      localStorage.setItem(SHELF_WIDTH_KEY, String(applyShelfWidth(favShelf.getBoundingClientRect().width)));
+      const w = parseInt(localStorage.getItem(key), 10);
+      if (w) onChange(clamp(w));
     } catch {
       /* modo privado etc. */
     }
   };
+  handle.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    handle.setPointerCapture(e.pointerId);
+    handle.classList.add('active');
 
-  resizeHandle.addEventListener('pointermove', move);
-  resizeHandle.addEventListener('pointerup', up);
-  resizeHandle.addEventListener('pointercancel', up);
-});
+    const startX = e.clientX;
+    const startW = element.getBoundingClientRect().width;
+
+    const move = (ev) => onChange(clamp(startW + (ev.clientX - startX)));
+    const up = (ev) => {
+      handle.classList.remove('active');
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', up);
+      handle.removeEventListener('pointercancel', up);
+      try {
+        localStorage.setItem(key, String(clamp(element.getBoundingClientRect().width)));
+      } catch {
+        /* modo privado etc. */
+      }
+    };
+
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', up);
+    handle.addEventListener('pointercancel', up);
+  });
+  window.addEventListener('resize', () => {
+    try {
+      const w = parseInt(localStorage.getItem(key), 10);
+      if (w) onChange(clamp(w));
+    } catch {
+      /* modo privado etc. */
+    }
+  });
+  return { load };
+}
+
+const shelfResizer = attachWidthResize(resizeHandle, favShelf, SHELF_WIDTH_KEY, SHELF_MIN_W, applyShelfWidth);
+
+function loadShelfWidth() {
+  shelfResizer.load();
+}
+
+/* ---------- redimensionar quadros de feed ---------- */
+
+const NEWS_WIDTH_KEY = 'localdashboard:newsWidth';
+const NEWS_MIN_W = 360;
+const newsGrid = document.getElementById('news-grid');
+const newsResizeHandle = document.getElementById('news-resize-handle');
+
+function applyNewsWidth(w) {
+  const width = Math.max(NEWS_MIN_W, Math.min(shelfMaxWidth(), Math.round(w)));
+  newsGrid.style.width = width + 'px';
+  newsGrid.style.maxWidth = width + 'px';
+  return width;
+}
+
+const newsResizer = attachWidthResize(newsResizeHandle, newsGrid, NEWS_WIDTH_KEY, NEWS_MIN_W, applyNewsWidth);
+
+function loadNewsWidth() {
+  newsResizer.load();
+}
 
 /* ---------- feed de notícias ---------- */
 
-let feedConfig = { url: '', count: 5 };
-let goodFeedShown = false;
-let rawRetryTimer = null;
-let rawRetryCount = 0;
+const FEED_KEYS = ['localdashboard:feed', 'localdashboard:feed2'];
+const FEED_CACHE_KEYS = ['localdashboard:feedCache', 'localdashboard:feedCache2'];
 
-function loadFeedConfig() {
+let feeds = [
+  { url: '', title: 'Notícias', count: 5 },
+  { url: '', title: 'Notícias', count: 5 },
+];
+
+let goodFeedShown = [false, false];
+let rawRetryTimer = [null, null];
+let rawRetryCount = [0, 0];
+let feedToken = [0, 0];
+
+function loadFeeds() {
   try {
     const raw = localStorage.getItem(FEED_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      feedConfig.url = parsed.url || '';
-      feedConfig.count = parsed.count || 5;
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      feeds = [0, 1].map((i) => ({
+        url: (parsed[i] && parsed[i].url) || '',
+        title: (parsed[i] && parsed[i].title) || 'Notícias',
+        count: (parsed[i] && parseInt(parsed[i].count, 10)) || 5,
+      }));
+    } else if (parsed && typeof parsed === 'object' && parsed.url !== undefined) {
+      feeds[0] = {
+        url: parsed.url || '',
+        title: parsed.title || 'Notícias',
+        count: parseInt(parsed.count, 10) || 5,
+      };
+      feeds[1] = {
+        url: (parsed.feed2 && parsed.feed2.url) || '',
+        title: (parsed.feed2 && parsed.feed2.title) || 'Notícias',
+        count: (parsed.feed2 && parseInt(parsed.feed2.count, 10)) || 5,
+      };
     }
   } catch {
     /* modo privado etc. */
   }
 }
 
-function saveFeedConfig() {
+function saveFeeds() {
   try {
-    localStorage.setItem(FEED_KEY, JSON.stringify(feedConfig));
+    localStorage.setItem(FEED_KEY, JSON.stringify(feeds));
   } catch {
     /* modo privado etc. */
   }
 }
-
-const FEED_CACHE_KEY = 'localdashboard:feedCache';
 
 function decodeXmlBytes(bytes) {
   const utf8 = new TextDecoder('utf-8');
@@ -1006,24 +1064,29 @@ async function fetchJsonFeed(url) {
     .filter(Boolean);
 }
 
-function loadFeedCache() {
+function loadFeedCache(i) {
   try {
-    const raw = localStorage.getItem(FEED_CACHE_KEY);
+    const raw = localStorage.getItem(FEED_CACHE_KEYS[i]);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (data && data.raw !== true) return null;
-    if (!data || data.url !== feedConfig.url || !Array.isArray(data.items)) return null;
+    if (!data || data.raw !== true) return null;
+    if (!data || data.url !== feeds[i].url || !Array.isArray(data.items)) return null;
     return data.items;
   } catch {
     return null;
   }
 }
 
-function saveFeedCache(items) {
+function saveFeedCache(i, items) {
   try {
     localStorage.setItem(
-      FEED_CACHE_KEY,
-      JSON.stringify({ url: feedConfig.url, raw: true, savedAt: Date.now(), items: items.slice(0, feedConfig.count) })
+      FEED_CACHE_KEYS[i],
+      JSON.stringify({
+        url: feeds[i].url,
+        raw: true,
+        savedAt: Date.now(),
+        items: items.slice(0, feeds[i].count),
+      })
     );
   } catch {
     /* modo privado etc. */
@@ -1059,8 +1122,8 @@ function formatFeedDate(value) {
   });
 }
 
-function renderNews(items) {
-  newsList.replaceChildren();
+function renderNews(i, items) {
+  newsLists[i].replaceChildren();
   items.forEach((item) => {
     const row = document.createElement('a');
     row.className = 'news-item';
@@ -1076,93 +1139,106 @@ function renderNews(items) {
 
     row.appendChild(title);
     row.appendChild(meta);
-    newsList.appendChild(row);
+    newsLists[i].appendChild(row);
   });
 }
 
-function renderGoodNews(items) {
-  renderNews(items.slice(0, feedConfig.count));
-  goodFeedShown = true;
+function renderGoodNews(i, items) {
+  renderNews(i, items.slice(0, feeds[i].count));
+  goodFeedShown[i] = true;
 }
 
-function clearRawRetry() {
-  if (rawRetryTimer) {
-    clearTimeout(rawRetryTimer);
-    rawRetryTimer = null;
+function clearRawRetry(i) {
+  if (rawRetryTimer[i]) {
+    clearTimeout(rawRetryTimer[i]);
+    rawRetryTimer[i] = null;
   }
-  rawRetryCount = 0;
+  rawRetryCount[i] = 0;
 }
 
-function scheduleRawRetry(token) {
-  if (rawRetryTimer || rawRetryCount >= 10) return;
-  const delay = Math.min(1500 * Math.pow(1.5, rawRetryCount), 15000);
-  rawRetryCount += 1;
-  rawRetryTimer = setTimeout(() => {
-    rawRetryTimer = null;
-    if (!feedConfig.url || newsZone.hidden || goodFeedShown || token !== feedToken) {
-      clearRawRetry();
+function scheduleRawRetry(i, token) {
+  if (rawRetryTimer[i] || rawRetryCount[i] >= 10) return;
+  const delay = Math.min(1500 * Math.pow(1.5, rawRetryCount[i]), 15000);
+  rawRetryCount[i] += 1;
+  rawRetryTimer[i] = setTimeout(() => {
+    rawRetryTimer[i] = null;
+    if (!feeds[i].url || newsZones[i].hidden || goodFeedShown[i] || token !== feedToken[i]) {
+      clearRawRetry(i);
       return;
     }
-    runRawUpgrade();
+    runRawUpgrade(i);
   }, delay);
 }
 
-let feedToken = 0;
-
-async function runRawUpgrade() {
-  const token = feedToken;
+async function runRawUpgrade(i) {
+  const token = feedToken[i];
   try {
-    const items = await fetchRawFeed(feedConfig.url);
-    if (token !== feedToken) return;
-    renderGoodNews(items);
-    saveFeedCache(items);
-    clearRawRetry();
+    const items = await fetchRawFeed(feeds[i].url);
+    if (token !== feedToken[i]) return;
+    renderGoodNews(i, items);
+    saveFeedCache(i, items);
+    clearRawRetry(i);
   } catch {
-    if (token !== feedToken) return;
-    if (!goodFeedShown) {
+    if (token !== feedToken[i]) return;
+    if (!goodFeedShown[i]) {
       try {
-        const items = await fetchJsonFeed(feedConfig.url);
-        if (token !== feedToken) return;
-        renderNews(items.slice(0, feedConfig.count));
+        const items = await fetchJsonFeed(feeds[i].url);
+        if (token !== feedToken[i]) return;
+        renderNews(i, items.slice(0, feeds[i].count));
       } catch {
-        if (token !== feedToken) return;
-        const cached = loadFeedCache();
+        if (token !== feedToken[i]) return;
+        const cached = loadFeedCache(i);
         if (!cached || !cached.length) {
-          newsList.replaceChildren();
+          newsLists[i].replaceChildren();
           const error = el('div', 'news-error');
           error.textContent = 'Não foi possível carregar o feed de notícias.';
-          newsList.appendChild(error);
+          newsLists[i].appendChild(error);
         }
       }
     }
-    scheduleRawRetry(token);
+    scheduleRawRetry(i, token);
   }
 }
 
-async function refreshNews() {
-  if (!feedConfig.url) return;
+async function refreshNews(i) {
+  const feed = feeds[i];
+  newsTitles[i].textContent = feed.title || 'Notícias';
+  if (!feed.url) {
+    newsZones[i].hidden = true;
+    newsLists[i].replaceChildren();
+    return;
+  }
 
-  newsZone.hidden = false;
-  newsList.replaceChildren();
-  goodFeedShown = false;
-  feedToken += 1;
-  clearRawRetry();
+  newsZones[i].hidden = false;
+  newsLists[i].replaceChildren();
+  goodFeedShown[i] = false;
+  feedToken[i] += 1;
+  clearRawRetry(i);
 
-  const cached = loadFeedCache();
+  const cached = loadFeedCache(i);
   if (cached && cached.length) {
-    renderGoodNews(cached);
+    renderGoodNews(i, cached);
   } else {
     const loading = el('div', 'news-loading');
     loading.textContent = 'Carregando notícias...';
-    newsList.appendChild(loading);
+    newsLists[i].appendChild(loading);
   }
 
-  runRawUpgrade();
+  runRawUpgrade(i);
+}
+
+function refreshAllFeeds() {
+  refreshNews(0);
+  refreshNews(1);
 }
 
 feedBtn.addEventListener('click', () => {
-  feedUrlInput.value = feedConfig.url;
-  feedCountInput.value = String(feedConfig.count);
+  feedUrlInput.value = feeds[0].url;
+  feedTitleInput.value = feeds[0].title;
+  feedCountInput.value = String(feeds[0].count);
+  feedUrlInput2.value = feeds[1].url;
+  feedTitleInput2.value = feeds[1].title;
+  feedCountInput2.value = String(feeds[1].count);
   feedModal.hidden = false;
   setTimeout(() => feedUrlInput.focus(), 50);
 });
@@ -1180,32 +1256,45 @@ feedModal.addEventListener('click', (e) => {
 
 feedForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  feedConfig.url = feedUrlInput.value.trim();
-  feedConfig.count = parseInt(feedCountInput.value, 10) || 5;
-  saveFeedConfig();
+  feeds[0].url = feedUrlInput.value.trim();
+  feeds[0].title = feedTitleInput.value.trim() || 'Notícias';
+  feeds[0].count = parseInt(feedCountInput.value, 10) || 5;
+  feeds[1].url = feedUrlInput2.value.trim();
+  feeds[1].title = feedTitleInput2.value.trim() || 'Notícias';
+  feeds[1].count = parseInt(feedCountInput2.value, 10) || 5;
+  saveFeeds();
   feedModal.hidden = true;
-  refreshNews();
+  refreshAllFeeds();
 });
 
 feedClear.addEventListener('click', () => {
-  feedConfig.url = '';
-  feedConfig.count = 5;
-  saveFeedConfig();
-  clearRawRetry();
-  goodFeedShown = false;
+  feeds[0] = { url: '', title: 'Notícias', count: 5 };
+  feeds[1] = { url: '', title: 'Notícias', count: 5 };
+  saveFeeds();
+  clearRawRetry(0);
+  clearRawRetry(1);
+  goodFeedShown = [false, false];
   try {
-    localStorage.removeItem(FEED_CACHE_KEY);
+    localStorage.removeItem(FEED_CACHE_KEYS[0]);
+    localStorage.removeItem(FEED_CACHE_KEYS[1]);
   } catch {
     /* modo privado etc. */
   }
   feedUrlInput.value = '';
+  feedTitleInput.value = '';
   feedCountInput.value = '5';
-  newsZone.hidden = true;
-  newsList.replaceChildren();
+  feedUrlInput2.value = '';
+  feedTitleInput2.value = '';
+  feedCountInput2.value = '5';
+  newsZones[0].hidden = true;
+  newsZones[1].hidden = true;
+  newsLists[0].replaceChildren();
+  newsLists[1].replaceChildren();
   feedModal.hidden = true;
 });
 
-newsRefresh.addEventListener('click', refreshNews);
+newsRefreshes[0].addEventListener('click', () => refreshNews(0));
+newsRefreshes[1].addEventListener('click', () => refreshNews(1));
 
 /* ---------- gerenciar categorias ---------- */
 
@@ -1339,12 +1428,6 @@ function storageGet(key) {
 }
 
 function buildExportPayload() {
-  let feed = {};
-  try {
-    feed = JSON.parse(storageGet(FEED_KEY) || '{}');
-  } catch {
-    feed = {};
-  }
   return {
     app: 'localdashboard',
     version: 1,
@@ -1353,8 +1436,9 @@ function buildExportPayload() {
     categories: cats,
     faviconService,
     background: storageGet(BACKGROUND_KEY) || '',
-    feed,
+    feeds: feeds.map((f) => ({ url: f.url, title: f.title, count: f.count })),
     shelfWidth: parseInt(storageGet(SHELF_WIDTH_KEY) || '', 10) || null,
+    newsWidth: parseInt(storageGet(NEWS_WIDTH_KEY) || '', 10) || null,
   };
 }
 
@@ -1429,23 +1513,43 @@ function importSettings(file) {
       if (data.feed && typeof data.feed === 'object') {
         localStorage.setItem(
           FEED_KEY,
-          JSON.stringify({
-            url: data.feed.url || '',
-            count: parseInt(data.feed.count, 10) || 5,
-          })
+          JSON.stringify([
+            {
+              url: data.feed.url || '',
+              title: data.feed.title || 'Notícias',
+              count: parseInt(data.feed.count, 10) || 5,
+            },
+            {
+              url: (data.feed.feed2 && data.feed.feed2.url) || '',
+              title: (data.feed.feed2 && data.feed.feed2.title) || 'Notícias',
+              count: (data.feed.feed2 && parseInt(data.feed.feed2.count, 10)) || 5,
+            },
+          ])
+        );
+      } else if (Array.isArray(data.feeds)) {
+        localStorage.setItem(
+          FEED_KEY,
+          JSON.stringify(
+            [0, 1].map((i) => ({
+              url: (data.feeds[i] && data.feeds[i].url) || '',
+              title: (data.feeds[i] && data.feeds[i].title) || 'Notícias',
+              count: (data.feeds[i] && parseInt(data.feeds[i].count, 10)) || 5,
+            }))
+          )
         );
       }
-      loadFeedConfig();
-      if (feedConfig.url) {
-        refreshNews();
-      } else {
-        newsZone.hidden = true;
-      }
+      loadFeeds();
+      refreshAllFeeds();
 
       if (typeof data.shelfWidth === 'number' && data.shelfWidth) {
         localStorage.setItem(SHELF_WIDTH_KEY, String(data.shelfWidth));
       }
       loadShelfWidth();
+
+      if (typeof data.newsWidth === 'number' && data.newsWidth) {
+        localStorage.setItem(NEWS_WIDTH_KEY, String(data.newsWidth));
+      }
+      loadNewsWidth();
 
       if (!cats.includes(activeCategory)) activeCategory = 'Geral';
       renderAll();
@@ -1537,9 +1641,10 @@ if (!cats.includes(activeCategory)) activeCategory = 'Geral';
 renderAll();
 loadBackground();
 renderBgPresets();
-loadFeedConfig();
+loadFeeds();
 loadShelfWidth();
+loadNewsWidth();
 renderAll();
 tick();
 setInterval(tick, 1000);
-if (feedConfig.url) refreshNews();
+refreshAllFeeds();

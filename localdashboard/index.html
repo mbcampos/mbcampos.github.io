@@ -68,14 +68,28 @@
         </div>
       </section>
 
-      <section class="news-zone" id="news-zone" hidden>
-        <div class="news-head">
-          <span class="news-title" id="news-title">Notícias</span>
-          <button class="icon-btn news-refresh" id="news-refresh" type="button" title="Atualizar">
-            <span class="material-symbols-outlined">refresh</span>
-          </button>
+      <section class="news-grid" id="news-grid">
+        <div class="news-zone" id="news-zone" hidden>
+          <div class="news-head">
+            <span class="news-title" id="news-title">Notícias</span>
+            <button class="icon-btn news-refresh" id="news-refresh" type="button" title="Atualizar">
+              <span class="material-symbols-outlined">refresh</span>
+            </button>
+          </div>
+          <div class="news-list" id="news-list"></div>
         </div>
-        <div class="news-list" id="news-list"></div>
+
+        <div class="news-zone" id="news-zone-2" hidden>
+          <div class="news-head">
+            <span class="news-title" id="news-title-2">Notícias</span>
+            <button class="icon-btn news-refresh" id="news-refresh-2" type="button" title="Atualizar">
+              <span class="material-symbols-outlined">refresh</span>
+            </button>
+          </div>
+          <div class="news-list" id="news-list-2"></div>
+        </div>
+
+        <div class="resize-handle news-resize" id="news-resize-handle" title="Arrastar para redimensionar"></div>
       </section>
 
       <div class="fav-area">
@@ -193,23 +207,56 @@
       </div>
 
       <form class="modal-form" id="feed-form">
-        <div class="field">
-          <label for="feed-url">URL do RSS</label>
-          <input id="feed-url" type="url" placeholder="https://exemplo.com/feed.xml">
-          <span class="field-hint mono">Ex.: https://g1.globo.com/rss/g1/</span>
+        <div class="feed-block">
+          <div class="field">
+            <label for="feed-title">Título</label>
+            <input id="feed-title" type="text" maxlength="30" placeholder="Notícias">
+          </div>
+
+          <div class="feed-row">
+            <div class="field">
+              <label for="feed-url">Feed 1 · URL do RSS</label>
+              <input id="feed-url" type="url" placeholder="https://exemplo.com/feed.xml">
+              <span class="field-hint mono">Ex.: https://g1.globo.com/rss/g1/</span>
+            </div>
+
+            <div class="field feed-count-field">
+              <label for="feed-count">Notícias</label>
+              <select id="feed-count">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="8">8</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="feed-count">Quantidade de notícias</label>
-          <select id="feed-count">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="8">8</option>
-          </select>
+        <div class="feed-block">
+          <div class="field">
+            <label for="feed-title-2">Título</label>
+            <input id="feed-title-2" type="text" maxlength="30" placeholder="Notícias">
+          </div>
+
+          <div class="feed-row">
+            <div class="field">
+              <label for="feed-url-2">Feed 2 · URL do RSS</label>
+              <input id="feed-url-2" type="url" placeholder="https://exemplo.com/feed2.xml">
+              <span class="field-hint mono">Deixe vazio para mostrar apenas o Feed 1</span>
+            </div>
+
+            <div class="field feed-count-field">
+              <label for="feed-count-2">Notícias</label>
+              <select id="feed-count-2">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="8">8</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div class="modal-actions">
-          <button class="btn-ghost" id="feed-clear" type="button">Remover feed</button>
+          <button class="btn-ghost" id="feed-clear" type="button">Remover feeds</button>
           <div class="flex-spacer"></div>
           <button class="btn-ghost" id="feed-cancel" type="button">Cancelar</button>
           <button class="btn-primary" type="submit">Aplicar</button>
