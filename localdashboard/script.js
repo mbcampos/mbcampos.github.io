@@ -207,6 +207,83 @@ async function discoverFavicon(url) {
   return '';
 }
 
+/* ---------- cache local de ícones (IndexedDB) ---------- */
+
+const ICON_DB_NAME = 'localdashboard-icons';
+const ICON_DB_STORE = 'icons';
+const ICON_CACHE_MAX = 512 * 1024;
+
+function openIconDb() {
+  return new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('indexedDB indisponível'));
+      return;
+    }
+    const req = indexedDB.open(ICON_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(ICON_DB_STORE)) {
+        req.result.createObjectStore(ICON_DB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getCachedIcon(url) {
+  try {
+    const db = await openIconDb();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(ICON_DB_STORE, 'readonly');
+      const req = tx.objectStore(ICON_DB_STORE).get(url);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function cacheIcon(url, dataUrl) {
+  try {
+    const db = await openIconDb();
+    await new Promise((resolve) => {
+      const tx = db.transaction(ICON_DB_STORE, 'readwrite');
+      tx.objectStore(ICON_DB_STORE).put(dataUrl, url);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } catch {
+    /* ignora */
+  }
+}
+
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = () => reject(fr.error);
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function fetchAndCacheIcon(url) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { mode: 'cors', signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    if (!blob.type || !blob.type.startsWith('image/')) return null;
+    const dataUrl = await blobToDataURL(blob);
+    if (dataUrl.length <= ICON_CACHE_MAX) cacheIcon(url, dataUrl);
+    return dataUrl;
+  } catch {
+    return null;
+  }
+}
+
 /* ---------- persistência ---------- */
 
 function load() {
@@ -373,8 +450,29 @@ function setIcon(link, fav) {
       link.appendChild(letter);
     }
   };
-  img.src = sources[index];
-  link.appendChild(img);
+
+  const activate = (src) => {
+    if (letter.parentNode === link) letter.remove();
+    link.appendChild(img);
+    img.src = src;
+  };
+
+  getCachedIcon(sources[0]).then(async (cached) => {
+    if (cached) {
+      activate(cached);
+      return;
+    }
+    link.appendChild(letter);
+    const dataUrl = await fetchAndCacheIcon(sources[0]);
+    if (dataUrl) {
+      activate(dataUrl);
+    } else {
+      activate(sources[0]);
+    }
+  }).catch(() => {
+    link.appendChild(letter);
+    activate(sources[0]);
+  });
 }
 
 function buildTile(fav, index) {
