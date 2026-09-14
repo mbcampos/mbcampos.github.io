@@ -2,6 +2,7 @@ const STORAGE_KEY = 'localdashboard:favorites';
 const CATEGORIES_KEY = 'localdashboard:categories';
 const SERVICE_KEY = 'localdashboard:faviconService';
 const BACKGROUND_KEY = 'localdashboard:background';
+const FEED_KEY = 'localdashboard:feed';
 
 const DEFAULTS = [
   { name: 'Google', url: 'https://www.google.com', icon: '', category: 'Geral' },
@@ -41,6 +42,18 @@ const panels = document.getElementById('panels');
 const manageLink = document.getElementById('manage-link');
 const modal = document.getElementById('bookmark-modal');
 const manageModal = document.getElementById('manage-modal');
+const catModal = document.getElementById('cat-modal');
+const catForm = document.getElementById('cat-form');
+const catNameInput = document.getElementById('cat-name');
+const catClose = document.getElementById('cat-close');
+const catCancel = document.getElementById('cat-cancel');
+const confirmModal = document.getElementById('confirm-modal');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmMsg = document.getElementById('confirm-msg');
+const confirmOkLabel = document.getElementById('confirm-ok-label');
+const confirmClose = document.getElementById('confirm-close');
+const confirmCancel = document.getElementById('confirm-cancel');
+const confirmOk = document.getElementById('confirm-ok');
 const catList = document.getElementById('cat-list');
 const modalTitle = document.getElementById('modal-title');
 const modalClose = document.getElementById('modal-close');
@@ -67,6 +80,19 @@ const bgClose = document.getElementById('bg-close');
 const bgCancel = document.getElementById('bg-cancel');
 const bgClear = document.getElementById('bg-clear');
 const bgImage = document.getElementById('bg-image');
+const feedBtn = document.getElementById('feed-btn');
+const feedModal = document.getElementById('feed-modal');
+const feedForm = document.getElementById('feed-form');
+const feedUrlInput = document.getElementById('feed-url');
+const feedCountInput = document.getElementById('feed-count');
+const feedClose = document.getElementById('feed-close');
+const feedCancel = document.getElementById('feed-cancel');
+const feedClear = document.getElementById('feed-clear');
+const newsZone = document.getElementById('news-zone');
+const newsList = document.getElementById('news-list');
+const newsRefresh = document.getElementById('news-refresh');
+const favShelf = document.querySelector('.fav-shelf');
+const resizeHandle = document.getElementById('resize-handle');
 
 /* ---------- helpers ---------- */
 
@@ -265,19 +291,45 @@ function renderTabs() {
   add.type = 'button';
   add.title = 'Nova categoria';
   add.innerHTML = '<span class="material-symbols-outlined">add</span>';
-  add.addEventListener('click', () => {
-    const name = prompt('Nome da nova categoria:');
-    if (name && name.trim()) {
-      const n = name.trim();
-      if (!cats.includes(n)) cats.push(n);
-      saveCategories();
-      activeCategory = n;
-      renderTabs();
-      renderPanels();
-    }
-  });
+  add.addEventListener('click', () => openCatModal());
   tabs.appendChild(add);
 }
+
+function openCatModal() {
+  catNameInput.value = '';
+  catForm.reset();
+  catModal.hidden = false;
+  catNameInput.focus();
+}
+
+function closeCatModal() {
+  catModal.hidden = true;
+}
+
+catClose.addEventListener('click', closeCatModal);
+catCancel.addEventListener('click', closeCatModal);
+catModal.addEventListener('click', (e) => {
+  if (e.target === catModal) closeCatModal();
+});
+
+catForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const n = catNameInput.value.trim();
+  if (!n) return;
+  if (cats.includes(n)) {
+    catNameInput.setCustomValidity('Já existe uma categoria com esse nome.');
+    catNameInput.reportValidity();
+    return;
+  }
+  cats.push(n);
+  saveCategories();
+  activeCategory = n;
+  renderTabs();
+  renderPanels();
+  closeCatModal();
+});
+
+catNameInput.addEventListener('input', () => catNameInput.setCustomValidity(''));
 
 function renderPanels() {
   panels.replaceChildren();
@@ -666,6 +718,384 @@ bgForm.addEventListener('submit', (e) => {
   bgModal.hidden = true;
 });
 
+/* ---------- redimensionar quadro de favoritos ---------- */
+
+const SHELF_WIDTH_KEY = 'localdashboard:shelfWidth';
+const SHELF_MIN_W = 360;
+const SHELF_REFERENCE_W = 760;
+const SHELF_CSS_VARS = {
+  tileSize: ['--tile-size', 56],
+  tileCol: ['--tile-col', 72],
+  tileGap: ['--tile-gap', 14],
+  tilePad: ['--tile-pad', 6],
+  tileIcon: ['--tile-icon', 30],
+  tileLetter: ['--tile-letter', 18],
+  tileFont: ['--tile-font', 11],
+  tileBorder: ['--tile-border', 12],
+  shelfPad: ['--fav-shelf-pad', 28],
+};
+
+function shelfMaxWidth() {
+  return Math.round(window.innerWidth * 0.8);
+}
+
+function scaleFor(w) {
+  return Math.max(0.7, Math.min(1.2, w / SHELF_REFERENCE_W));
+}
+
+function applyShelfScale(w) {
+  const s = scaleFor(w);
+  for (const key of Object.keys(SHELF_CSS_VARS)) {
+    const [varName, base] = SHELF_CSS_VARS[key];
+    favShelf.style.setProperty(varName, Math.round(base * s) + 'px');
+  }
+}
+
+function applyShelfWidth(w) {
+  const width = Math.max(SHELF_MIN_W, Math.min(shelfMaxWidth(), Math.round(w)));
+  favShelf.style.width = width + 'px';
+  favShelf.style.maxWidth = width + 'px';
+  applyShelfScale(width);
+  return width;
+}
+
+function loadShelfWidth() {
+  try {
+    const w = parseInt(localStorage.getItem(SHELF_WIDTH_KEY), 10);
+    if (w && w >= SHELF_MIN_W && w <= shelfMaxWidth()) applyShelfWidth(w);
+  } catch {
+    /* modo privado etc. */
+  }
+}
+
+window.addEventListener('resize', () => {
+  const w = parseInt(localStorage.getItem(SHELF_WIDTH_KEY), 10);
+  if (w) applyShelfWidth(Math.min(w, shelfMaxWidth()));
+});
+
+resizeHandle.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  resizeHandle.setPointerCapture(e.pointerId);
+  resizeHandle.classList.add('active');
+
+  const startX = e.clientX;
+  const startW = favShelf.getBoundingClientRect().width;
+
+  const move = (ev) => applyShelfWidth(startW + (ev.clientX - startX));
+  const up = (ev) => {
+    resizeHandle.classList.remove('active');
+    resizeHandle.removeEventListener('pointermove', move);
+    resizeHandle.removeEventListener('pointerup', up);
+    resizeHandle.removeEventListener('pointercancel', up);
+    try {
+      localStorage.setItem(SHELF_WIDTH_KEY, String(applyShelfWidth(favShelf.getBoundingClientRect().width)));
+    } catch {
+      /* modo privado etc. */
+    }
+  };
+
+  resizeHandle.addEventListener('pointermove', move);
+  resizeHandle.addEventListener('pointerup', up);
+  resizeHandle.addEventListener('pointercancel', up);
+});
+
+/* ---------- feed de notícias ---------- */
+
+let feedConfig = { url: '', count: 5 };
+let goodFeedShown = false;
+let rawRetryTimer = null;
+let rawRetryCount = 0;
+
+function loadFeedConfig() {
+  try {
+    const raw = localStorage.getItem(FEED_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      feedConfig.url = parsed.url || '';
+      feedConfig.count = parsed.count || 5;
+    }
+  } catch {
+    /* modo privado etc. */
+  }
+}
+
+function saveFeedConfig() {
+  try {
+    localStorage.setItem(FEED_KEY, JSON.stringify(feedConfig));
+  } catch {
+    /* modo privado etc. */
+  }
+}
+
+const FEED_CACHE_KEY = 'localdashboard:feedCache';
+
+function decodeXmlBytes(bytes) {
+  const utf8 = new TextDecoder('utf-8');
+  const text = utf8.decode(bytes);
+  if (!text.includes('\uFFFD')) return text;
+  return new TextDecoder('windows-1252').decode(bytes);
+}
+
+function fetchWithTimeout(url, ms) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+async function fetchRawFeed(url) {
+  const encoded = encodeURIComponent(url);
+  const attempts = [
+    fetchWithTimeout(`https://api.allorigins.win/raw?url=${encoded}`, 12000).then(decodeAndParse),
+    fetchWithTimeout(`https://api.allorigins.win/raw?url=${encoded}`, 12000).then(decodeAndParse),
+    fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encoded}`, 12000).then(decodeAndParse),
+    fetchWithTimeout(`https://api.allorigins.win/get?charset=ISO-8859-1&url=${encoded}`, 12000).then(decodeAndParseFromGet),
+  ];
+
+  try {
+    return await Promise.any(attempts);
+  } catch {
+    throw new Error('raw feed falhou');
+  }
+}
+
+function decodeAndParseFromGet(res) {
+  if (!res.ok) throw new Error('status ' + res.status);
+  return res.json().then((data) => {
+    if (!data || !data.contents) throw new Error('sem contents');
+    const items = parseRss(String(data.contents));
+    if (!items.length) throw new Error('feed vazio');
+    return items;
+  });
+}
+
+function decodeAndParse(res) {
+  if (!res.ok) throw new Error('status ' + res.status);
+  return res.arrayBuffer().then((buf) => {
+    const bytes = new Uint8Array(buf);
+    const text = decodeXmlBytes(bytes);
+    const items = parseRss(text);
+    if (!items.length) throw new Error('feed vazio');
+    return items;
+  });
+}
+
+async function fetchJsonFeed(url) {
+  const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+  const res = await fetchWithTimeout(api, 10000);
+  if (!res.ok) throw new Error('json status ' + res.status);
+  const data = await res.json();
+  if (data.status !== 'ok' || !Array.isArray(data.items)) throw new Error('json inválido');
+  return data.items
+    .map((it) => {
+      const title = (it.title || '').trim();
+      const link = (it.link || '').trim();
+      if (!title || !link) return null;
+      return { title, url: link, date: it.pubDate || '' };
+    })
+    .filter(Boolean);
+}
+
+function loadFeedCache() {
+  try {
+    const raw = localStorage.getItem(FEED_CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data && data.raw !== true) return null;
+    if (!data || data.url !== feedConfig.url || !Array.isArray(data.items)) return null;
+    return data.items;
+  } catch {
+    return null;
+  }
+}
+
+function saveFeedCache(items) {
+  try {
+    localStorage.setItem(
+      FEED_CACHE_KEY,
+      JSON.stringify({ url: feedConfig.url, raw: true, savedAt: Date.now(), items: items.slice(0, feedConfig.count) })
+    );
+  } catch {
+    /* modo privado etc. */
+  }
+}
+
+function parseRss(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  const items = Array.from(doc.querySelectorAll('item'));
+  return items
+    .map((item) => {
+      const title = item.querySelector('title');
+      const link = item.querySelector('link');
+      const dateNode = item.querySelector('pubDate');
+      const titleText = title ? title.textContent.trim() : '';
+      const linkText = link ? link.textContent.trim() : '';
+      const dateText = dateNode ? dateNode.textContent.trim() : '';
+      if (!titleText || !linkText) return null;
+      return { title: titleText, url: linkText, date: dateText };
+    })
+    .filter(Boolean);
+}
+
+function formatFeedDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function renderNews(items) {
+  newsList.replaceChildren();
+  items.forEach((item) => {
+    const row = document.createElement('a');
+    row.className = 'news-item';
+    row.href = item.url;
+    row.target = '_blank';
+    row.rel = 'noopener noreferrer';
+
+    const title = el('span', 'news-title-text');
+    title.textContent = item.title;
+
+    const meta = el('span', 'news-meta');
+    meta.textContent = formatFeedDate(item.date);
+
+    row.appendChild(title);
+    row.appendChild(meta);
+    newsList.appendChild(row);
+  });
+}
+
+function renderGoodNews(items) {
+  renderNews(items.slice(0, feedConfig.count));
+  goodFeedShown = true;
+}
+
+function clearRawRetry() {
+  if (rawRetryTimer) {
+    clearTimeout(rawRetryTimer);
+    rawRetryTimer = null;
+  }
+  rawRetryCount = 0;
+}
+
+function scheduleRawRetry(token) {
+  if (rawRetryTimer || rawRetryCount >= 10) return;
+  const delay = Math.min(1500 * Math.pow(1.5, rawRetryCount), 15000);
+  rawRetryCount += 1;
+  rawRetryTimer = setTimeout(() => {
+    rawRetryTimer = null;
+    if (!feedConfig.url || newsZone.hidden || goodFeedShown || token !== feedToken) {
+      clearRawRetry();
+      return;
+    }
+    runRawUpgrade();
+  }, delay);
+}
+
+let feedToken = 0;
+
+async function runRawUpgrade() {
+  const token = feedToken;
+  try {
+    const items = await fetchRawFeed(feedConfig.url);
+    if (token !== feedToken) return;
+    renderGoodNews(items);
+    saveFeedCache(items);
+    clearRawRetry();
+  } catch {
+    if (token !== feedToken) return;
+    if (!goodFeedShown) {
+      try {
+        const items = await fetchJsonFeed(feedConfig.url);
+        if (token !== feedToken) return;
+        renderNews(items.slice(0, feedConfig.count));
+      } catch {
+        if (token !== feedToken) return;
+        const cached = loadFeedCache();
+        if (!cached || !cached.length) {
+          newsList.replaceChildren();
+          const error = el('div', 'news-error');
+          error.textContent = 'Não foi possível carregar o feed de notícias.';
+          newsList.appendChild(error);
+        }
+      }
+    }
+    scheduleRawRetry(token);
+  }
+}
+
+async function refreshNews() {
+  if (!feedConfig.url) return;
+
+  newsZone.hidden = false;
+  newsList.replaceChildren();
+  goodFeedShown = false;
+  feedToken += 1;
+  clearRawRetry();
+
+  const cached = loadFeedCache();
+  if (cached && cached.length) {
+    renderGoodNews(cached);
+  } else {
+    const loading = el('div', 'news-loading');
+    loading.textContent = 'Carregando notícias...';
+    newsList.appendChild(loading);
+  }
+
+  runRawUpgrade();
+}
+
+feedBtn.addEventListener('click', () => {
+  feedUrlInput.value = feedConfig.url;
+  feedCountInput.value = String(feedConfig.count);
+  feedModal.hidden = false;
+  setTimeout(() => feedUrlInput.focus(), 50);
+});
+
+feedClose.addEventListener('click', () => {
+  feedModal.hidden = true;
+});
+feedCancel.addEventListener('click', () => {
+  feedModal.hidden = true;
+});
+
+feedModal.addEventListener('click', (e) => {
+  if (e.target === feedModal) feedModal.hidden = true;
+});
+
+feedForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  feedConfig.url = feedUrlInput.value.trim();
+  feedConfig.count = parseInt(feedCountInput.value, 10) || 5;
+  saveFeedConfig();
+  feedModal.hidden = true;
+  refreshNews();
+});
+
+feedClear.addEventListener('click', () => {
+  feedConfig.url = '';
+  feedConfig.count = 5;
+  saveFeedConfig();
+  clearRawRetry();
+  goodFeedShown = false;
+  try {
+    localStorage.removeItem(FEED_CACHE_KEY);
+  } catch {
+    /* modo privado etc. */
+  }
+  feedUrlInput.value = '';
+  feedCountInput.value = '5';
+  newsZone.hidden = true;
+  newsList.replaceChildren();
+  feedModal.hidden = true;
+});
+
+newsRefresh.addEventListener('click', refreshNews);
+
 /* ---------- gerenciar categorias ---------- */
 
 function renderCatList() {
@@ -731,19 +1161,34 @@ function renameCategory(cat) {
 function deleteCategory(cat) {
   if (cat === 'Geral') return;
   const count = favorites.filter((f) => f.category === cat).length;
-  const ok = confirm(
-    `Excluir a categoria "${cat}"?${count ? ' Os favoritos dela serão movidos para "Geral".' : ''}`
+
+  confirmTitle.textContent = 'Excluir categoria';
+  const msg = el('span');
+  msg.appendChild(document.createTextNode('Excluir a categoria '));
+  const strong = el('strong');
+  strong.textContent = `"${cat}"`;
+  msg.appendChild(strong);
+  msg.appendChild(
+    document.createTextNode(
+      `?${count ? ` Os favoritos dela serão movidos para "Geral".` : ''}`
+    )
   );
-  if (!ok) return;
-  favorites.forEach((f) => {
-    if (f.category === cat) f.category = 'Geral';
-  });
-  cats.splice(cats.indexOf(cat), 1);
-  if (activeCategory === cat) activeCategory = 'Geral';
-  save();
-  saveCategories();
-  renderAll();
-  renderCatList();
+  confirmMsg.replaceChildren(msg);
+
+  confirmOkLabel.textContent = 'Excluir';
+  confirmOk.onclick = () => {
+    favorites.forEach((f) => {
+      if (f.category === cat) f.category = 'Geral';
+    });
+    cats.splice(cats.indexOf(cat), 1);
+    if (activeCategory === cat) activeCategory = 'Geral';
+    save();
+    saveCategories();
+    renderAll();
+    renderCatList();
+    confirmModal.hidden = true;
+  };
+  confirmModal.hidden = false;
 }
 
 manageLink.addEventListener('click', () => {
@@ -760,6 +1205,16 @@ manageDone.addEventListener('click', () => {
 
 manageModal.addEventListener('click', (e) => {
   if (e.target === manageModal) manageModal.hidden = true;
+});
+
+confirmClose.addEventListener('click', () => {
+  confirmModal.hidden = true;
+});
+confirmCancel.addEventListener('click', () => {
+  confirmModal.hidden = true;
+});
+confirmModal.addEventListener('click', (e) => {
+  if (e.target === confirmModal) confirmModal.hidden = true;
 });
 
 /* ---------- busca ---------- */
@@ -790,7 +1245,11 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     closeModal();
+    closeCatModal();
+    confirmModal.hidden = true;
     manageModal.hidden = true;
+    feedModal.hidden = true;
+    bgModal.hidden = true;
   }
 });
 
@@ -817,5 +1276,9 @@ if (!cats.includes(activeCategory)) activeCategory = 'Geral';
 renderAll();
 loadBackground();
 renderBgPresets();
+loadFeedConfig();
+loadShelfWidth();
+renderAll();
 tick();
 setInterval(tick, 1000);
+if (feedConfig.url) refreshNews();

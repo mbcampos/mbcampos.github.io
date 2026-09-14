@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Local Dashboard</title>
+  <title>Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,9 +18,14 @@
   </div>
 
   <main class="startpage">
-    <button class="bg-btn" id="bg-btn" type="button" title="Plano de fundo">
-      <span class="material-symbols-outlined">image</span>
-    </button>
+    <div class="corner-btns">
+      <button class="bg-btn" id="feed-btn" type="button" title="Feed de notícias">
+        <span class="material-symbols-outlined">rss_feed</span>
+      </button>
+      <button class="bg-btn" id="bg-btn" type="button" title="Plano de fundo">
+        <span class="material-symbols-outlined">image</span>
+      </button>
+    </div>
 
     <div class="cast">
 
@@ -46,11 +51,23 @@
         </div>
       </section>
 
+      <section class="news-zone" id="news-zone" hidden>
+        <div class="news-head">
+          <span class="news-title" id="news-title">Notícias</span>
+          <button class="icon-btn news-refresh" id="news-refresh" type="button" title="Atualizar">
+            <span class="material-symbols-outlined">refresh</span>
+          </button>
+        </div>
+        <div class="news-list" id="news-list"></div>
+      </section>
+
       <div class="fav-area">
         <div class="fav-shelf">
           <nav class="tabs" id="tabs" aria-label="Categorias"></nav>
 
           <div class="dock-panels" id="panels"></div>
+
+          <div class="resize-handle" id="resize-handle" title="Arrastar para redimensionar"></div>
         </div>
 
         <div class="manage-link" id="manage-link" role="button" tabindex="0" title="Gerenciar categorias">
@@ -148,6 +165,42 @@
     </div>
   </div>
 
+  <!-- MODAL FEED DE NOTÍCIAS -->
+  <div class="overlay" id="feed-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Feed de notícias</h3>
+        <button class="icon-btn" id="feed-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="modal-form" id="feed-form">
+        <div class="field">
+          <label for="feed-url">URL do RSS</label>
+          <input id="feed-url" type="url" placeholder="https://exemplo.com/feed.xml">
+          <span class="field-hint mono">Ex.: https://g1.globo.com/rss/g1/</span>
+        </div>
+
+        <div class="field">
+          <label for="feed-count">Quantidade de notícias</label>
+          <select id="feed-count">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-ghost" id="feed-clear" type="button">Remover feed</button>
+          <div class="flex-spacer"></div>
+          <button class="btn-ghost" id="feed-cancel" type="button">Cancelar</button>
+          <button class="btn-primary" type="submit">Aplicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CATEGORIAS -->
   <div class="overlay" id="manage-modal" hidden>
     <div class="modal">
@@ -163,6 +216,54 @@
       <div class="modal-actions">
         <div class="flex-spacer"></div>
         <button class="btn-primary" id="manage-done" type="button">Concluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOVA CATEGORIA -->
+  <div class="overlay" id="cat-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Nova categoria</h3>
+        <button class="icon-btn" id="cat-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="modal-form" id="cat-form">
+        <div class="field">
+          <label for="cat-name">Nome</label>
+          <input id="cat-name" type="text" placeholder="Ex: Finanças" maxlength="24" required>
+        </div>
+
+        <div class="modal-actions">
+          <div class="flex-spacer"></div>
+          <button class="btn-ghost" id="cat-cancel" type="button">Cancelar</button>
+          <button class="btn-primary" type="submit">Criar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAÇÃO -->
+  <div class="overlay" id="confirm-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirm-title">Excluir</h3>
+        <button class="icon-btn" id="confirm-close" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <p class="confirm-msg" id="confirm-msg"></p>
+
+      <div class="modal-actions">
+        <div class="flex-spacer"></div>
+        <button class="btn-ghost" id="confirm-cancel" type="button">Cancelar</button>
+        <button class="btn-danger" id="confirm-ok" type="button">
+          <span class="material-symbols-outlined">delete</span>
+          <span id="confirm-ok-label">Excluir</span>
+        </button>
       </div>
     </div>
   </div>
