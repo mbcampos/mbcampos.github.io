@@ -698,12 +698,12 @@ body {
   transition: background 0.15s, border-color 0.15s;
 }
 
-.resize-handle::before {
-  content: '';
+.resize-handle .resize-icon {
   width: 16px;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.5);
+  height: 16px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
 }
 
 .resize-handle:hover {
@@ -716,8 +716,8 @@ body {
   border-color: var(--cyan);
 }
 
-.resize-handle.active::before {
-  background: #ffffff;
+.resize-handle.active .resize-icon {
+  color: #ffffff;
 }
 
 .group-panel {
