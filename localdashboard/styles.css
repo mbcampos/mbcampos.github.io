@@ -502,6 +502,12 @@ body {
   color: #ffffff;
 }
 
+.tab-btn.drag-over {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(124, 189, 255, 0.4);
+}
+
 .tab-sep {
   width: 1px;
   height: 14px;

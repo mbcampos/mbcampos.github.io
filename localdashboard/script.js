@@ -40,6 +40,7 @@ let searchProvider = 'google';
 let savedService = '';
 let editingId = null;
 let draggingIndex = null;
+let dragOverTab = null;
 
 /* ---------- DOM ---------- */
 
@@ -374,6 +375,7 @@ function saveCategories() {
 
 function renderTabs() {
   tabs.replaceChildren();
+  dragOverTab = null;
 
   cats.forEach((cat, i) => {
     if (i > 0) tabs.appendChild(el('div', 'tab-sep'));
@@ -386,6 +388,35 @@ function renderTabs() {
       renderTabs();
       renderPanels();
     });
+
+    btn.addEventListener('dragover', (e) => {
+      if (draggingIndex === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (btn !== dragOverTab) {
+        if (dragOverTab) dragOverTab.classList.remove('drag-over');
+        dragOverTab = btn;
+      }
+      btn.classList.add('drag-over');
+    });
+
+    btn.addEventListener('dragleave', () => {
+      btn.classList.remove('drag-over');
+      if (dragOverTab === btn) dragOverTab = null;
+    });
+
+    btn.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (Number.isNaN(from) || favorites[from] === undefined) return;
+      if (favorites[from].category === cat) return;
+      favorites[from].category = cat;
+      activeCategory = cat;
+      save();
+      renderAll();
+    });
+
     tabs.appendChild(btn);
   });
 
@@ -455,7 +486,7 @@ function renderAll() {
 /* ---------- favorites ---------- */
 
 function setIcon(link, fav) {
-  const sources = fav.icon ? [fav.icon] : faviconSourcesFor(fav.url);
+  const sources = fav.icon ? [fav.icon] : faviconSourcesFor(fav.url, fav.service);
   const letter = el('span', 'letter');
   letter.textContent = letterOf(fav.name);
   letter.style.color = colorFor(fav.name);
@@ -605,6 +636,10 @@ function clearDragTargets() {
   document.querySelectorAll('.fav-item.drag-target').forEach((t) => {
     t.classList.remove('drag-target');
   });
+  document.querySelectorAll('.tab-btn.drag-over').forEach((t) => {
+    t.classList.remove('drag-over');
+  });
+  dragOverTab = null;
 }
 
 document.addEventListener('click', closeAllMenus);
@@ -639,7 +674,7 @@ function openModal(index) {
     inputName.value = fav.name;
     inputUrl.value = fav.url;
     inputIcon.value = fav.icon || '';
-    inputService.value = '';
+    inputService.value = fav.service || '';
     deleteBtn.hidden = false;
     populateCategories(fav.category);
   }
@@ -674,13 +709,14 @@ form.addEventListener('submit', (e) => {
   const name = inputName.value.trim();
   let url = inputUrl.value.trim();
   const icon = inputIcon.value.trim();
+  const service = inputService.value.trim();
   const category = inputCategory.value || 'Geral';
 
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     url = 'https://' + url;
   }
 
-  const fav = { name, url, icon, category };
+  const fav = { name, url, icon, category, service };
 
   if (editingId === null) {
     favorites.push(fav);
@@ -692,7 +728,7 @@ form.addEventListener('submit', (e) => {
   renderAll();
   closeModal();
 
-  const serviceNow = inputService.value.trim();
+  const serviceNow = service;
   const isTemplate = serviceNow.includes('{domain}') || serviceNow.includes('{url}');
 
   if (isTemplate && serviceNow !== faviconService) {
@@ -713,9 +749,8 @@ form.addEventListener('submit', (e) => {
     savedService = '';
   }
 
-  if (!icon) {
-    const target = serviceNow && !isTemplate ? normalizeUrl(serviceNow) : url;
-    discoverFavicon(target).then((found) => {
+  if (!icon && !service) {
+    discoverFavicon(url).then((found) => {
       if (!found) return;
       fav.icon = found;
       save();
@@ -1485,6 +1520,7 @@ function cleanImportedFavorite(f) {
     name: String(f.name || f.url || '').trim(),
     url: f.url || '',
     icon: f.icon || '',
+    service: f.service || '',
     category: (f.category || 'Geral').trim() || 'Geral',
   };
 }
