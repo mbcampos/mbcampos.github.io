@@ -1247,6 +1247,11 @@ async function refreshNews(i) {
 function refreshAllFeeds() {
   refreshNews(0);
   refreshNews(1);
+  syncNewsResizeVisibility();
+}
+
+function syncNewsResizeVisibility() {
+  newsResizeHandle.hidden = !feeds.some((f) => f.url);
 }
 
 feedBtn.addEventListener('click', () => {
@@ -1307,6 +1312,7 @@ feedClear.addEventListener('click', () => {
   newsZones[1].hidden = true;
   newsLists[0].replaceChildren();
   newsLists[1].replaceChildren();
+  syncNewsResizeVisibility();
   feedModal.hidden = true;
 });
 

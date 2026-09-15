@@ -698,6 +698,10 @@ body {
   transition: background 0.15s, border-color 0.15s;
 }
 
+.resize-handle[hidden] {
+  display: none;
+}
+
 .resize-handle .resize-icon {
   width: 16px;
   height: 16px;
