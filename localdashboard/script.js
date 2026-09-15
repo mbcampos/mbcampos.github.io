@@ -1,6 +1,11 @@
 const STORAGE_KEY = 'localdashboard:favorites';
 const CATEGORIES_KEY = 'localdashboard:categories';
 const SERVICE_KEY = 'localdashboard:faviconService';
+const SEARCH_PROVIDER_KEY = 'localdashboard:searchProvider';
+const SEARCH_PROVIDERS = {
+  google: 'https://www.google.com/search?q=',
+  duckduckgo: 'https://duckduckgo.com/?q=',
+};
 const BACKGROUND_KEY = 'localdashboard:background';
 const FEED_KEY = 'localdashboard:feed';
 
@@ -31,6 +36,7 @@ let favorites = [];
 let cats = [];
 let activeCategory = 'Geral';
 let faviconService = '';
+let searchProvider = 'google';
 let savedService = '';
 let editingId = null;
 let draggingIndex = null;
@@ -322,6 +328,17 @@ function save() {
 function loadService() {
   faviconService = (localStorage.getItem(SERVICE_KEY) || '').trim();
   savedService = faviconService;
+}
+
+function loadSearchProvider() {
+  const value = (localStorage.getItem(SEARCH_PROVIDER_KEY) || '').trim();
+  searchProvider = SEARCH_PROVIDERS[value] ? value : 'google';
+}
+
+function renderSearchProvider() {
+  document.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.provider === searchProvider);
+  });
 }
 
 function loadCategories() {
@@ -1435,6 +1452,7 @@ function buildExportPayload() {
     favorites,
     categories: cats,
     faviconService,
+    searchProvider,
     background: storageGet(BACKGROUND_KEY) || '',
     feeds: feeds.map((f) => ({ url: f.url, title: f.title, count: f.count })),
     shelfWidth: parseInt(storageGet(SHELF_WIDTH_KEY) || '', 10) || null,
@@ -1551,6 +1569,13 @@ function importSettings(file) {
       }
       loadNewsWidth();
 
+      if (typeof data.searchProvider === 'string' && SEARCH_PROVIDERS[data.searchProvider]) {
+        searchProvider = data.searchProvider;
+        localStorage.setItem(SEARCH_PROVIDER_KEY, searchProvider);
+      }
+      loadSearchProvider();
+      renderSearchProvider();
+
       if (!cats.includes(activeCategory)) activeCategory = 'Geral';
       renderAll();
     } catch (err) {
@@ -1583,6 +1608,19 @@ importFile.addEventListener('change', () => {
 
 /* ---------- busca ---------- */
 
+document.querySelectorAll('.seg-btn').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    searchProvider = btn.dataset.provider;
+    try {
+      localStorage.setItem(SEARCH_PROVIDER_KEY, searchProvider);
+    } catch {
+      /* modo privado etc. */
+    }
+    renderSearchProvider();
+  });
+});
+
 searchForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const q = searchInput.value.trim();
@@ -1593,7 +1631,7 @@ searchForm.addEventListener('submit', (e) => {
   } else if (q.includes('.') && !q.includes(' ')) {
     window.open('https://' + q, '_blank');
   } else {
-    window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
+    window.open(SEARCH_PROVIDERS[searchProvider] + encodeURIComponent(q), '_blank');
   }
   searchInput.value = '';
 });
@@ -1644,7 +1682,10 @@ renderBgPresets();
 loadFeeds();
 loadShelfWidth();
 loadNewsWidth();
+loadSearchProvider();
+renderSearchProvider();
 renderAll();
 tick();
 setInterval(tick, 1000);
 refreshAllFeeds();
+searchInput.focus();
